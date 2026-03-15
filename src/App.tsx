@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CategoryGrid } from '@/components/category/CategoryGrid'
 import { CategoryDialog } from '@/components/category/CategoryDialog'
-import { ActiveTracker } from '@/components/tracking/ActiveTracker'
 import { WorkDayToolbar } from '@/components/workday/WorkDayToolbar'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { useTrackingStore } from '@/stores/trackingStore'
@@ -156,8 +155,6 @@ function App() {
               }
             />
           </Routes>
-
-          <ActiveTracker />
 
           <CategoryDialog
             isOpen={isDialogOpen}
