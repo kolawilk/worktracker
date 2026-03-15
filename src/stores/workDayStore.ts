@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { WorkDay } from '@/types'
+import { useSyncStore } from './syncStore'
 
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
@@ -50,6 +51,9 @@ export const useWorkDayStore = create<WorkDayStore>()(
           return
         }
 
+        // Sync: Pausiere auch das Kategory-Tracking
+        useSyncStore.getState().onWorkDayPause()
+
         set({
           currentWorkDay: {
             ...currentWorkDay,
@@ -69,6 +73,9 @@ export const useWorkDayStore = create<WorkDayStore>()(
         const pauseStart = new Date(currentWorkDay.pauseStart)
         const pauseDurationMinutes = Math.floor((pauseEnd.getTime() - pauseStart.getTime()) / 60000)
 
+        // Sync: Setze Kategory-Tracking fort
+        useSyncStore.getState().onWorkDayResume()
+
         set({
           currentWorkDay: {
             ...currentWorkDay,
@@ -84,6 +91,9 @@ export const useWorkDayStore = create<WorkDayStore>()(
         if (!currentWorkDay || currentWorkDay.endTime) {
           return
         }
+
+        // Sync: Beende auch das Kategory-Tracking
+        useSyncStore.getState().onWorkDayEnd()
 
         set({
           currentWorkDay: {
