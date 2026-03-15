@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmojiPicker } from './EmojiPicker'
 import type { Category } from '@/types'
 
 interface CategoryDialogProps {
@@ -56,6 +57,10 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
       }
     }
 
+    const handleEmojiPickerSelect = (emoji: string) => {
+      setEmoji(emoji)
+    }
+
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent ref={ref} className="sm:max-w-[425px]">
@@ -85,21 +90,27 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
 
             <div className="space-y-2">
               <Label htmlFor="category-emoji">Emoji</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="category-emoji"
-                  value={emoji}
-                  onChange={handleEmojiInput}
-                  placeholder=" z.B. 💼, 🏠, 📊"
-                  maxLength={2}
-                  required
-                />
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-md border bg-accent text-2xl"
-                  aria-hidden="true"
-                >
-                  {emoji || '❓'}
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    id="category-emoji"
+                    value={emoji}
+                    onChange={handleEmojiInput}
+                    placeholder=" z.B. 💼, 🏠, 📊"
+                    maxLength={2}
+                    required
+                  />
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-md border bg-accent text-2xl"
+                    aria-hidden="true"
+                  >
+                    {emoji || '❓'}
+                  </div>
                 </div>
+                <EmojiPicker
+                  onSelect={handleEmojiPickerSelect}
+                  selectedEmoji={emoji}
+                />
               </div>
             </div>
 
