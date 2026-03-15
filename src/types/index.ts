@@ -5,6 +5,8 @@ export interface Category {
   emoji: string;
   color?: string;
   createdAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
 }
 
 // Time Entry Types

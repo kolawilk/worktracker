@@ -5,6 +5,7 @@ import { useSyncStore } from './syncStore'
 
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
+  history: WorkDay[]
   startWorkDay: () => void
   pauseWorkDay: () => void
   resumeWorkDay: () => void
@@ -20,17 +21,18 @@ export const useWorkDayStore = create<WorkDayStore>()(
   persist(
     (set, get) => ({
       currentWorkDay: null,
+      history: [],
 
       startWorkDay: () => {
-        const { currentWorkDay } = get()
+        const { currentWorkDay, history } = get()
         const today = new Date()
         const date = today.toISOString().split('T')[0]
         
         // Wenn bereits ein Tag existiert und beendet wurde (endTime != null),
-        // diesen als beendet markieren, bevor ein neuer Tag startet
+        // diesen zur History hinzufügen, bevor ein neuer Tag startet
         if (currentWorkDay && currentWorkDay.endTime !== null) {
-          // Tag ist bereits beendet, nichts zu tun - einfach neuen Tag starten
-          // (der alte Tag bleibt im Store, wird aber überschrieben)
+          // Füge den beendeten Tag zur History hinzu (nicht überschreiben!)
+          history.push(currentWorkDay)
         }
         
         set({
@@ -42,6 +44,7 @@ export const useWorkDayStore = create<WorkDayStore>()(
             pauseStart: null,
             totalPauseMinutes: 0,
           },
+          history,
         })
       },
 
@@ -143,7 +146,10 @@ export const useWorkDayStore = create<WorkDayStore>()(
     }),
     {
       name: STORAGE_KEY,
-      partialize: (state) => ({ currentWorkDay: state.currentWorkDay }),
+      partialize: (state) => ({ 
+        currentWorkDay: state.currentWorkDay, 
+        history: state.history 
+      }),
     }
   )
 )
