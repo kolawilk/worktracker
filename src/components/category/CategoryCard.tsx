@@ -66,6 +66,9 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       }
     }
 
+    // Default-Farbe wenn keine gewählt (grau)
+    const displayColor = category.color || '#9ca3af'
+    
     return (
       <div
         ref={ref}
@@ -73,9 +76,10 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
           'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm transition-all duration-200',
           'hover:shadow-md hover:border-primary',
           'active:scale-95',
+          'min-h-[180px] min-w-[140px]',
           isPressed && 'scale-95 bg-accent',
           isHovered && 'border-primary',
-          isActive && 'border-primary bg-primary/5 ring-2 ring-primary/50 ring-offset-2'
+          isActive && 'border-primary bg-primary/5'
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
@@ -100,23 +104,22 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
           {category.emoji}
         </div>
         
-        <div className="text-center w-full">
+        <div className="text-center w-full flex-1 flex flex-col justify-center">
           <h3 className="text-lg font-semibold text-foreground">
             {category.name}
           </h3>
-          {category.color && (
-            <div
-              className="mt-2 h-2 w-8 rounded-full mx-auto transition-colors duration-300"
-              style={{ 
-                backgroundColor: isActive ? '#3b82f6' : category.color 
-              }}
-              aria-hidden="true"
-            />
-          )}
+          {/* Farb-Balken immer mit gleicher Größe, damit Grid stabil bleibt */}
+          <div
+            className="mt-2 h-2 w-8 rounded-full mx-auto transition-colors duration-300"
+            style={{ 
+              backgroundColor: isActive ? '#3b82f6' : displayColor 
+            }}
+            aria-hidden="true"
+          />
         </div>
 
         {isActive && (
-          <div className="mt-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-mono text-sm">
+          <div className="px-3 py-1 rounded-full bg-primary/10 text-primary font-mono text-sm">
             {formatDuration(duration)}
           </div>
         )}
