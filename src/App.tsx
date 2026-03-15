@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button'
 import { CategoryGrid } from '@/components/category/CategoryGrid'
 import { CategoryDialog } from '@/components/category/CategoryDialog'
 import { ActiveTracker } from '@/components/tracking/ActiveTracker'
-import { WorkDayControls } from '@/components/workday/WorkDayControls'
-import { WorkDayTimer } from '@/components/workday/WorkDayTimer'
+import { WorkDayToolbar } from '@/components/workday/WorkDayToolbar'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { useTrackingStore } from '@/stores/trackingStore'
 import type { Category } from '@/types'
@@ -69,11 +68,8 @@ function App() {
           </Button>
         </div>
 
-        {/* Work Day Timer Section */}
-        <WorkDayTimer />
-
-        {/* Work Day Controls Section */}
-        <WorkDayControls />
+        {/* Work Day Toolbar Section (sticky header) */}
+        <WorkDayToolbar />
 
         {/* Active Tracker Section */}
         <ActiveTracker />
