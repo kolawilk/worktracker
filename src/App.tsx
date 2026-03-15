@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CategoryGrid } from '@/components/category/CategoryGrid'
 import { CategoryDialog } from '@/components/category/CategoryDialog'
+import { ActiveTracker } from '@/components/tracking/ActiveTracker'
 import { useCategoryStore } from '@/stores/categoryStore'
+import { useTrackingStore } from '@/stores/trackingStore'
 import type { Category } from '@/types'
 import './App.css'
 
@@ -13,6 +15,7 @@ function App() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   
   const { categories, addCategory, updateCategory, deleteCategory } = useCategoryStore()
+  useTrackingStore()
 
   useEffect(() => {
     setMounted(true)
@@ -48,9 +51,8 @@ function App() {
     }
   }
 
-  const handleSelectCategory = (category: Category) => {
-    console.log('Selected category:', category)
-    // TODO: Start tracking for this category
+  const handleSelectCategory = (_category: Category) => {
+    // Tracking wird in CategoryCard direkt über die Store-Funktionen gestartet/gestoppt
   }
 
   return (
@@ -64,6 +66,9 @@ function App() {
             + Neue Kategorie
           </Button>
         </div>
+
+        {/* Active Tracker Section */}
+        <ActiveTracker />
 
         {categories.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-muted rounded-xl">

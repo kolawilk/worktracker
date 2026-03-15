@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useTrackingStore } from '@/stores/trackingStore'
 import type { Category } from '@/types'
 
 interface CategoryCardProps {
   category: Category
-  onSelect?: () => void
+  onSelect?: (category: Category) => void
   onEdit?: () => void
   onDelete?: () => void
   onLongPress?: () => void
@@ -16,6 +17,31 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     const [isHovered, setIsHovered] = React.useState(false)
     const [isPressed, setIsPressed] = React.useState(false)
     const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+    
+    const { session, startTracking, stopTracking, getCurrentDuration } = useTrackingStore()
+    
+    const isActive = session.categoryId === category.id && session.isRunning
+    const duration = getCurrentDuration()
+    
+    const formatDuration = (seconds: number): string => {
+      const hours = Math.floor(seconds / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      const secs = seconds % 60
+      
+      if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+      }
+      return `${minutes}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const handleCardClick = () => {
+      if (isActive) {
+        stopTracking()
+      } else {
+        startTracking(category.id)
+      }
+      onSelect?.(category)
+    }
 
     const handleMouseDown = () => {
       setIsPressed(true)
@@ -30,7 +56,6 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
         longPressTimer.current = null
-        onSelect?.()
       }
     }
 
@@ -47,47 +72,62 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative flex flex-col items-center justify-center gap-3 rounded-xl border bg-card p-6 shadow-sm transition-all duration-200',
+          'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm transition-all duration-200',
           'hover:shadow-md hover:border-primary',
           'active:scale-95',
           isPressed && 'scale-95 bg-accent',
-          isHovered && 'border-primary'
+          isHovered && 'border-primary',
+          isActive && 'border-primary bg-primary/5 ring-2 ring-primary/50 ring-offset-2'
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onClick={handleCardClick}
         role="button"
         aria-label={`Category ${category.name}`}
+        aria-pressed={isActive}
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            onSelect?.()
+            handleCardClick()
           }
         }}
       >
-        <div className="text-6xl leading-none select-none">
+        <div className={cn(
+          'text-6xl leading-none select-none transition-transform duration-300',
+          isActive && 'animate-bounce'
+        )}>
           {category.emoji}
         </div>
         
-        <div className="text-center">
+        <div className="text-center w-full">
           <h3 className="text-lg font-semibold text-foreground">
             {category.name}
           </h3>
           {category.color && (
             <div
-              className="mt-2 h-2 w-8 rounded-full mx-auto"
-              style={{ backgroundColor: category.color }}
+              className="mt-2 h-2 w-8 rounded-full mx-auto transition-colors duration-300"
+              style={{ 
+                backgroundColor: isActive ? '#3b82f6' : category.color 
+              }}
               aria-hidden="true"
             />
           )}
         </div>
 
+        {isActive && (
+          <div className="mt-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-mono text-sm">
+            {formatDuration(duration)}
+          </div>
+        )}
+
         <div
           className={cn(
             'absolute right-2 top-2 flex gap-1',
-            isHovered ? 'opacity-100' : 'opacity-0'
+            isHovered ? 'opacity-100' : 'opacity-0',
+            isActive && 'opacity-0'
           )}
         >
           <Button
@@ -115,6 +155,12 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
             🗑️
           </Button>
         </div>
+
+        {isActive && (
+          <div className="absolute -bottom-3 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+            Aktiv
+          </div>
+        )}
       </div>
     )
   }
