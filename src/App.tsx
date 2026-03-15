@@ -78,8 +78,8 @@ function App() {
     if (currentWorkDay.endTime) {
       return {
         status: 'ended' as const,
-        label: 'Arbeitstag beendet',
-        colorClass: 'text-gray-500 dark:text-gray-400',
+        label: 'Arbeitstag beendet — Klicke Start für neuen Tag',
+        colorClass: 'text-blue-600 dark:text-blue-400',
       }
     }
     
@@ -196,14 +196,18 @@ function App() {
                       ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
                       : status.status === 'running'
                         ? 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-md'
-                        : 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : status.status === 'ended'
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                          : 'bg-muted text-muted-foreground cursor-not-allowed'
                   )}
                   onClick={handleStartPause}
-                  disabled={status.status === 'ended'}
+                  disabled={status.status === 'running'}
                   aria-label={status.status === 'running' ? 'Pause' : 'Start'}
                 >
                   {status.status === 'running' ? (
                     <Pause className="h-6 w-6" />
+                  ) : status.status === 'ended' ? (
+                    <Play className="h-6 w-6" />
                   ) : (
                     <Play className="h-6 w-6" />
                   )}
@@ -215,13 +219,16 @@ function App() {
                     <div className={cn(
                       'font-mono font-semibold text-lg transition-all duration-300',
                       status.status === 'ended'
-                        ? 'text-muted-foreground'
+                        ? 'text-blue-600 dark:text-blue-400'
                         : status.status === 'paused'
                           ? 'text-yellow-600 dark:text-yellow-400'
                           : 'text-foreground'
                     )}>
                       {formatDuration(workTime)}
                     </div>
+                    {status.status === 'ended' && (
+                      <div className="text-xs text-muted-foreground">Beendet — Klicke Start für neuen Tag</div>
+                    )}
                   </div>
                 </div>
 

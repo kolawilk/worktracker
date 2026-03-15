@@ -73,13 +73,11 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm transition-all duration-200',
-          'hover:shadow-md hover:border-primary',
-          'active:scale-95',
+          'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm',
           'min-h-[180px] min-w-[140px]',
           isPressed && 'scale-95 bg-accent',
-          isHovered && 'border-primary',
-          isActive && 'border-primary bg-primary/5'
+          isActive && 'border-primary shadow-lg bg-primary/5',
+          !isActive && 'hover:shadow-md hover:border-gray-300'
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
@@ -98,8 +96,9 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
         }}
       >
         <div className={cn(
-          'text-6xl leading-none select-none transition-colors duration-300',
-          isActive && 'text-primary'
+          'text-6xl leading-none select-none',
+          isActive && 'text-primary opacity-100',
+          !isActive && 'opacity-80'
         )}>
           {category.emoji}
         </div>
@@ -110,10 +109,10 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
           </h3>
           {/* Farb-Balken immer mit gleicher Größe, damit Grid stabil bleibt */}
           <div
-            className="mt-2 h-2 w-8 rounded-full mx-auto transition-colors duration-300"
-            style={{ 
-              backgroundColor: isActive ? '#3b82f6' : displayColor 
-            }}
+            className={cn(
+              "mt-2 h-2 w-8 rounded-full mx-auto",
+              isActive ? 'bg-primary' : 'bg-gray-300'
+            )}
             aria-hidden="true"
           />
         </div>
