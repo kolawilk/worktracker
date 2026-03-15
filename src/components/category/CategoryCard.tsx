@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTrackingStore } from '@/stores/trackingStore'
+import { useSyncStore } from '@/stores/syncStore'
 import type { Category } from '@/types'
 
 interface CategoryCardProps {
@@ -18,7 +19,8 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     const [isPressed, setIsPressed] = React.useState(false)
     const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     
-    const { session, startTracking, stopTracking, getCurrentDuration } = useTrackingStore()
+    const { session, getCurrentDuration } = useTrackingStore()
+    const { onCategoryClick } = useSyncStore()
     
     const isActive = session.categoryId === category.id && session.isRunning
     const duration = getCurrentDuration()
@@ -35,11 +37,7 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     }
 
     const handleCardClick = () => {
-      if (isActive) {
-        stopTracking()
-      } else {
-        startTracking(category.id)
-      }
+      onCategoryClick(category.id)
       onSelect?.(category)
     }
 
