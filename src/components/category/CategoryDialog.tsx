@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { EmojiPickerComponent as EmojiPicker } from './EmojiPicker'
+
 import type { Category } from '@/types'
 
 interface CategoryDialogProps {
@@ -55,10 +55,6 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
       if (value.length <= 2) {
         setEmoji(value)
       }
-    }
-
-    const handleEmojiPickerSelect = (emoji: string) => {
-      setEmoji(emoji)
     }
 
     return (
@@ -107,10 +103,6 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
                     {emoji || '❓'}
                   </div>
                 </div>
-                <EmojiPicker
-                  onSelect={handleEmojiPickerSelect}
-                  selectedEmoji={emoji}
-                />
               </div>
             </div>
 
