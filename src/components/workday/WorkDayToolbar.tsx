@@ -5,51 +5,46 @@ import { Play, Pause, Square } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
-interface WorkDayStatus {
-  status: 'not-started' | 'running' | 'paused' | 'ended'
-  label: string
-  colorClass: string
-  icon: React.ReactNode
-}
-
+/**
+ * ⚠️ DEPRECATED - Diese Komponente wird nicht mehr verwendet!
+ * 
+ * Die Arbeitstag-Steuerung ist nun direkt in App.tsx im Header integriert.
+ * Diese Datei wird nur für Referenzzwecke aufbewahrt.
+ */
 const WorkDayToolbar = () => {
   const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
   const [showEndDialog, setShowEndDialog] = useState(false)
 
   // Determine current status
-  const getStatus = (): WorkDayStatus => {
+  const getStatus = () => {
     if (!currentWorkDay) {
       return {
-        status: 'not-started',
+        status: 'not-started' as const,
         label: 'Arbeitstag nicht gestartet',
         colorClass: 'text-muted-foreground',
-        icon: <Play className="w-6 h-6" />,
       }
     }
     
     if (currentWorkDay.endTime) {
       return {
-        status: 'ended',
+        status: 'ended' as const,
         label: 'Arbeitstag beendet',
         colorClass: 'text-gray-500 dark:text-gray-400',
-        icon: <Square className="w-6 h-6" />,
       }
     }
     
     if (currentWorkDay.isPaused) {
       return {
-        status: 'paused',
+        status: 'paused' as const,
         label: 'Pausiert',
         colorClass: 'text-yellow-600 dark:text-yellow-400',
-        icon: <Pause className="w-6 h-6" />,
       }
     }
     
     return {
-      status: 'running',
+      status: 'running' as const,
       label: 'Arbeitstag läuft',
       colorClass: 'text-green-600 dark:text-green-400',
-      icon: <Play className="w-6 h-6" />,
     }
   }
 
@@ -107,19 +102,14 @@ const WorkDayToolbar = () => {
     setShowEndDialog(false)
   }
 
-  // Get button variant based on status
-  const getPrimaryButtonVariant = (): 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | null => {
-    return 'default'
-  }
-
   return (
     <>
-      {/* Toolbar Component - kompakt integriert in Header */}
+      {/* Toolbar Component - DEPRECATED, siehe App.tsx für aktuelle Implementierung */}
       <div className="flex items-center gap-2">
         {/* Left: Start/Pause Button */}
         <div className="flex items-center">
           <Button
-            variant={getPrimaryButtonVariant()}
+            variant="default"
             size="sm"
             className={cn(
               'h-8 px-3 rounded-lg transition-all duration-200',
