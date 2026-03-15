@@ -66,9 +66,6 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       }
     }
 
-    // Default-Farbe wenn keine gewählt (grau)
-    const displayColor = category.color || '#9ca3af'
-    
     return (
       <div
         ref={ref}
