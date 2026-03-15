@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { 
   getWeekStart, 
-  getWeekEnd, 
   formatISOWeek, 
   parseISOWeek, 
   getWeekDates,
