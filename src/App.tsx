@@ -145,6 +145,13 @@ function App() {
                       onDelete={handleDeleteCategory}
                     />
                   )}
+                  
+                  {/* Footer mit Credits */}
+                  <div className="py-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Made with ❤️ and help from my AI friends
+                    </p>
+                  </div>
                 </>
               }
             />
