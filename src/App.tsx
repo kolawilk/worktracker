@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { CategoryGrid } from '@/components/category/CategoryGrid'
 import { CategoryDialog } from '@/components/category/CategoryDialog'
 import { ActiveTracker } from '@/components/tracking/ActiveTracker'
+import { WorkDayControls } from '@/components/workday/WorkDayControls'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { useTrackingStore } from '@/stores/trackingStore'
 import type { Category } from '@/types'
@@ -66,6 +67,9 @@ function App() {
             + Neue Kategorie
           </Button>
         </div>
+
+        {/* Work Day Controls Section */}
+        <WorkDayControls />
 
         {/* Active Tracker Section */}
         <ActiveTracker />
