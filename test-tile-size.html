@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tile Size Test</title>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      padding: 20px;
+    }
+    .card {
+      min-height: 180px;
+      min-width: 140px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .color-bar {
+      height: 8px;
+      width: 32px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tile Size Test</h1>
+  <div class="grid">
+    <div class="card">
+      <div style="font-size: 48px">🍎</div>
+      <div style="font-weight: bold; margin-top: 8px;">Apfel</div>
+      <div class="color-bar" style="background-color: #ef4444"></div>
+    </div>
+    <div class="card">
+      <div style="font-size: 48px">🍌</div>
+      <div style="font-weight: bold; margin-top: 8px;">Banane</div>
+      <div class="color-bar" style="background-color: #fbbf24"></div>
+    </div>
+    <div class="card">
+      <div style="font-size: 48px">🍇</div>
+      <div style="font-weight: bold; margin-top: 8px;">Trauben</div>
+      <div class="color-bar" style="background-color: #8b5cf6"></div>
+    </div>
+    <div class="card">
+      <div style="font-size: 48px">🥕</div>
+      <div style="font-weight: bold; margin-top: 8px;">Karotte</div>
+      <div class="color-bar" style="background-color: #f97316"></div>
+    </div>
+    <div class="card">
+      <div style="font-size: 48px">🥦</div>
+      <div style="font-weight: bold; margin-top: 8px;">Brokkoli</div>
+      <div class="color-bar" style="background-color: #22c55e"></div>
+    </div>
+  </div>
+  <p>Alle Kacheln sollten die gleiche Größe haben (min-height: 180px, min-width: 140px)</p>
+</body>
+</html>
