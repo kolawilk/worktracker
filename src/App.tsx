@@ -59,17 +59,19 @@ function App() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-foreground">
+        {/* Header mit WorkDayToolbar integriert */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <h1 className="text-2xl font-bold text-foreground">
             ⏱️ Worktracker
           </h1>
-          <Button onClick={handleAddCategory} size="lg">
+          
+          {/* WorkDayToolbar integriert in Header mitte */}
+          <WorkDayToolbar />
+          
+          <Button onClick={handleAddCategory} size="sm">
             + Neue Kategorie
           </Button>
         </div>
-
-        {/* Work Day Toolbar Section (sticky header) */}
-        <WorkDayToolbar />
 
         {/* Active Tracker Section */}
         <ActiveTracker />

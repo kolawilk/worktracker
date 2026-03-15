@@ -114,24 +114,19 @@ const WorkDayToolbar = () => {
 
   return (
     <>
-      {/* Toolbar Component */}
-      <div className={cn(
-        'fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 shadow-lg border-b',
-        'bg-card text-card-foreground border-border',
-        'transition-all duration-300 ease-in-out'
-      )}>
+      {/* Toolbar Component - kompakt integriert in Header */}
+      <div className="flex items-center gap-2">
         {/* Left: Start/Pause Button */}
         <div className="flex items-center">
           <Button
             variant={getPrimaryButtonVariant()}
-            size="icon"
+            size="sm"
             className={cn(
-              'h-14 w-14 md:h-16 md:w-16 rounded-xl transition-all duration-200',
-              'hover:scale-105 active:scale-95',
+              'h-8 px-3 rounded-lg transition-all duration-200',
               status.status === 'not-started' || status.status === 'paused'
-                ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20'
+                ? 'bg-green-600 hover:bg-green-700 text-white'
                 : status.status === 'running'
-                  ? 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-lg shadow-yellow-600/20'
+                  ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
                   : 'bg-muted text-muted-foreground'
             )}
             onClick={handleStartPause}
@@ -139,26 +134,21 @@ const WorkDayToolbar = () => {
             aria-label={status.status === 'running' ? 'Pause' : 'Start'}
           >
             {status.status === 'running' ? (
-              <Pause className="h-7 w-7 md:h-8 md:w-8" />
+              <Pause className="h-4 w-4" />
             ) : (
-              <Play className="h-7 w-7 md:h-8 md:w-8" />
+              <Play className="h-4 w-4" />
             )}
             <span className="sr-only">
               {status.status === 'running' ? 'Pause' : status.status === 'paused' ? 'Weiter' : 'Start'}
             </span>
           </Button>
-          <div className="ml-4 hidden md:block">
-            <div className="text-sm font-medium text-card-foreground">
-              {status.label}
-            </div>
-          </div>
         </div>
 
         {/* Center: Time Display */}
-        <div className="flex-1 flex items-center justify-center px-4">
+        <div className="flex items-center justify-center px-2">
           <div className="text-center">
             <div className={cn(
-              'font-mono font-bold tracking-tighter transition-all duration-300',
+              'font-mono font-bold text-sm transition-all duration-300',
               status.status === 'ended'
                 ? 'text-muted-foreground'
                 : status.status === 'paused'
@@ -167,11 +157,6 @@ const WorkDayToolbar = () => {
             )}>
               {formatDuration(workTime)}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
-              {status.status === 'running' ? 'Gesamtzeit läuft' : 
-               status.status === 'paused' ? 'Zeit pausiert' : 
-               status.status === 'ended' ? 'Arbeitstag beendet' : 'Bereit'}
-            </div>
           </div>
         </div>
 
@@ -179,17 +164,16 @@ const WorkDayToolbar = () => {
         <div className="flex items-center">
           <Button
             variant="destructive"
-            size="icon"
+            size="sm"
             className={cn(
-              'h-14 w-14 md:h-16 md:w-16 rounded-xl transition-all duration-200',
-              'hover:scale-105 active:scale-95',
-              'shadow-lg shadow-red-500/20'
+              'h-8 px-3 rounded-lg transition-all duration-200',
+              'hover:bg-red-700'
             )}
             onClick={handleEndWorkDay}
             disabled={status.status === 'not-started' || status.status === 'ended'}
             aria-label="Arbeitstag beenden"
           >
-            <Square className="h-7 w-7 md:h-8 md:w-8" />
+            <Square className="h-4 w-4" />
             <span className="sr-only">Arbeitstag beenden</span>
           </Button>
         </div>
