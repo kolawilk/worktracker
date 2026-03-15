@@ -19,9 +19,11 @@ function App() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   const location = useLocation()
   
-  const { categories, addCategory, updateCategory, deleteCategory } = useCategoryStore()
+  const { addCategory, updateCategory, deleteCategory, getActiveCategories } = useCategoryStore()
   const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
   useTrackingStore()
+
+  const activeCategories = getActiveCategories()
 
   useEffect(() => {
     setMounted(true)
@@ -261,7 +263,7 @@ function App() {
               path="/" 
               element={
                 <>
-                  {categories.length === 0 ? (
+                  {activeCategories.length === 0 ? (
                     <div className="text-center py-12 border-2 border-dashed border-muted rounded-xl">
                       <p className="text-muted-foreground text-lg">
                         Noch keine Kategorien vorhanden
@@ -275,7 +277,7 @@ function App() {
                     </div>
                   ) : (
                     <CategoryGrid
-                      categories={categories}
+                      categories={activeCategories}
                       onSelect={handleSelectCategory}
                       onEdit={handleEditCategory}
                       onDelete={handleDeleteCategory}
