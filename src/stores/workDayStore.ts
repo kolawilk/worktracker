@@ -21,8 +21,16 @@ export const useWorkDayStore = create<WorkDayStore>()(
       currentWorkDay: null,
 
       startWorkDay: () => {
+        const { currentWorkDay } = get()
         const today = new Date()
         const date = today.toISOString().split('T')[0]
+        
+        // Wenn bereits ein Tag existiert und beendet wurde (endTime != null),
+        // diesen als beendet markieren, bevor ein neuer Tag startet
+        if (currentWorkDay && currentWorkDay.endTime !== null) {
+          // Tag ist bereits beendet, nichts zu tun - einfach neuen Tag starten
+          // (der alte Tag bleibt im Store, wird aber überschrieben)
+        }
         
         set({
           currentWorkDay: {
