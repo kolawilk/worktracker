@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CategoryGrid } from '@/components/category/CategoryGrid'
 import { CategoryDialog } from '@/components/category/CategoryDialog'
-import { WorkDayToolbar } from '@/components/workday/WorkDayToolbar'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { useTrackingStore } from '@/stores/trackingStore'
+import { useWorkDayStore } from '@/stores/workDayStore'
 import { Link, Routes, Route, useLocation } from 'react-router-dom'
 import WeekPage from '@/pages/WeekPage'
 import type { Category } from '@/types'
+import { Play, Pause, Square } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import './App.css'
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const location = useLocation()
   
   const { categories, addCategory, updateCategory, deleteCategory } = useCategoryStore()
+  const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
   useTrackingStore()
 
   useEffect(() => {
@@ -60,6 +63,79 @@ function App() {
 
   const isWeekPage = location.pathname === '/week'
 
+  // WorkDay Status & Helper Functions (inline für Header)
+  const getStatus = () => {
+    if (!currentWorkDay) {
+      return {
+        status: 'not-started' as const,
+        label: 'Arbeitstag nicht gestartet',
+        colorClass: 'text-muted-foreground',
+      }
+    }
+    
+    if (currentWorkDay.endTime) {
+      return {
+        status: 'ended' as const,
+        label: 'Arbeitstag beendet',
+        colorClass: 'text-gray-500 dark:text-gray-400',
+      }
+    }
+    
+    if (currentWorkDay.isPaused) {
+      return {
+        status: 'paused' as const,
+        label: 'Pausiert',
+        colorClass: 'text-yellow-600 dark:text-yellow-400',
+      }
+    }
+    
+    return {
+      status: 'running' as const,
+      label: 'Arbeitstag läuft',
+      colorClass: 'text-green-600 dark:text-green-400',
+    }
+  }
+
+  const formatDuration = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000)
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const getTotalWorkTime = () => {
+    if (!currentWorkDay) return 0
+    const start = new Date(currentWorkDay.startTime).getTime()
+    const end = currentWorkDay.endTime 
+      ? new Date(currentWorkDay.endTime).getTime() 
+      : Date.now()
+    const grossTime = end - start
+    const pauseTimeMs = currentWorkDay.totalPauseMinutes * 60000
+    return grossTime - pauseTimeMs
+  }
+
+  const workTime = getTotalWorkTime()
+  const status = getStatus()
+
+  const handleStartPause = () => {
+    if (status.status === 'not-started') {
+      startWorkDay()
+    } else if (status.status === 'running') {
+      pauseWorkDay()
+    } else if (status.status === 'paused') {
+      resumeWorkDay()
+    }
+  }
+
+  const handleEndWorkDay = () => {
+    endWorkDay()
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar Navigation */}
@@ -98,17 +174,78 @@ function App() {
       {/* Hauptinhalt mit Platz für Sidebar */}
       <div className={isWeekPage ? "p-6" : "pl-[64px] p-6"}>
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header mit WorkDayToolbar integriert */}
+          {/* Header - kompakt, keine separaten Header-Bereich */}
           {!isWeekPage && (
-            <div className="flex items-center justify-between p-4 border-b">
-              <h1 className="text-2xl font-bold text-foreground">
-                ⏱️ Worktracker
+            <div className="flex items-center justify-between py-3 px-4 border-b">
+              {/* Links: Titel */}
+              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <span>⏱️</span> Worktracker
               </h1>
               
-              {/* WorkDayToolbar integriert in Header mitte */}
-              <WorkDayToolbar />
-              
-              <Button onClick={handleAddCategory} size="sm">
+              {/* Mitte: Arbeitstag-Steuerung inline integriert */}
+              <div className="flex items-center gap-2">
+                {/* Start/Pause Button */}
+                <Button
+                  variant="default"
+                  size="icon"
+                  className={cn(
+                    'h-[48px] w-[48px] rounded-lg transition-all duration-200 flex-shrink-0',
+                    status.status === 'not-started' || status.status === 'paused'
+                      ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
+                      : status.status === 'running'
+                        ? 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-md'
+                        : 'bg-muted text-muted-foreground cursor-not-allowed'
+                  )}
+                  onClick={handleStartPause}
+                  disabled={status.status === 'ended'}
+                  aria-label={status.status === 'running' ? 'Pause' : 'Start'}
+                >
+                  {status.status === 'running' ? (
+                    <Pause className="h-6 w-6" />
+                  ) : (
+                    <Play className="h-6 w-6" />
+                  )}
+                </Button>
+
+                {/* Zeit-Anzeige - dezente Farbe */}
+                <div className="flex items-center justify-center px-2 min-w-[100px]">
+                  <div className="text-center">
+                    <div className={cn(
+                      'font-mono font-semibold text-lg transition-all duration-300',
+                      status.status === 'ended'
+                        ? 'text-muted-foreground'
+                        : status.status === 'paused'
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-foreground'
+                    )}>
+                      {formatDuration(workTime)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stopp Button */}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className={cn(
+                    'h-[48px] w-[48px] rounded-lg transition-all duration-200 flex-shrink-0',
+                    'hover:bg-red-700 shadow-md',
+                    (status.status === 'not-started' || status.status === 'ended') && 'opacity-50 cursor-not-allowed'
+                  )}
+                  onClick={handleEndWorkDay}
+                  disabled={status.status === 'not-started' || status.status === 'ended'}
+                  aria-label="Arbeitstag beenden"
+                >
+                  <Square className="h-6 w-6" />
+                </Button>
+              </div>
+
+              {/* Rechts: Neue Kategorie Button */}
+              <Button 
+                onClick={handleAddCategory} 
+                size="sm"
+                className="h-[48px] rounded-lg"
+              >
                 + Neue Kategorie
               </Button>
             </div>

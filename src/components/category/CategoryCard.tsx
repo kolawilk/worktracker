@@ -98,8 +98,8 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
         }}
       >
         <div className={cn(
-          'text-6xl leading-none select-none transition-transform duration-300',
-          isActive && 'animate-bounce'
+          'text-6xl leading-none select-none transition-colors duration-300',
+          isActive && 'text-primary'
         )}>
           {category.emoji}
         </div>
