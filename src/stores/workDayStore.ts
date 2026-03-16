@@ -17,6 +17,7 @@ interface WorkDayStore {
   startWorkDay: () => void
   pauseWorkDay: () => void
   resumeWorkDay: () => void
+  resumeEndedWorkDay: () => void
   endWorkDay: () => void
   getCurrentWorkDay: () => WorkDay | null
   getTotalWorkTime: () => number
@@ -112,6 +113,28 @@ export const useWorkDayStore = create<WorkDayStore>()(
         }
       },
 
+      resumeEndedWorkDay: () => {
+        const { currentWorkDay } = get()
+        if (!currentWorkDay || !currentWorkDay.endTime) {
+          return
+        }
+
+        // Entferne das endTime, um den Tag fortzusetzen
+        // Die Pausenzeit bleibt erhalten (Fehierabend war ja Pause)
+        set({
+          currentWorkDay: {
+            ...currentWorkDay,
+            endTime: null,
+            isPaused: false,
+          },
+        })
+        
+        // Sound Feedback
+        if (useSettingsStore.getState().soundEnabled) {
+          playResumeSound()
+        }
+      },
+
       endWorkDay: () => {
         const { currentWorkDay } = get()
         if (!currentWorkDay || currentWorkDay.endTime) {
@@ -144,30 +167,38 @@ export const useWorkDayStore = create<WorkDayStore>()(
           return 0
         }
 
-        // 1. Summiere alle timeEntries für diesen Tag
+        // Zeit-Berechnung MUST sein:
+        // 1. Alle beendeten timeEntries addieren (feste Zeiten)
+        // 2. Aktuelle laufende Session HINZUFÜGEN ( falls existiert )
+        // 3. Pause abziehen
+        
         const { timeEntries } = useTimeEntryStore.getState()
+        const { session } = useTrackingStore.getState()
+        
         const today = currentWorkDay.date
         const todayEntries = timeEntries.filter(entry => entry.date === today)
         
+        // 🔍 WICHTIG: timeEntries sind BEENDET (endTime ist immer gesetzt)
+        // session ist die AKTUELLE, LAUFENDE Session (NICHT in timeEntries gespeichert)
+        
         let totalTime = todayEntries.reduce((total, entry) => {
+          if (!entry.endTime) return total
           const start = new Date(entry.startTime).getTime()
-          // entry.endTime ist immer gesetzt, da timeEntry nur gespeichert wird, wenn Tracking beendet wird
-          const end = entry.endTime ? new Date(entry.endTime).getTime() : start
+          const end = new Date(entry.endTime).getTime()
           return total + (end - start)
         }, 0)
 
-        // 2. Addiere die aktuelle laufende Session (falls existiert)
-        const { session } = useTrackingStore.getState()
+        // ✅ FIX: Nur die AKTUELLE laufende Session addieren (NICHT doppelt zählen!)
         if (session.isRunning && session.startTime && session.categoryId) {
           const sessionStart = new Date(session.startTime).getTime()
           totalTime += Date.now() - sessionStart
         }
 
-        // 3. Subtrahiere Pausenzeit (inkl. aktuelle Pausen-Dauer falls pausiert)
+        // Pausenzeit abziehen (inkl. aktuelle Pause falls pausiert)
         let totalPauseMs = currentWorkDay.totalPauseMinutes * 60000
-        if (currentWorkDay.isPaused && currentWorkDay.pauseStart) {
-          const pauseStart = new Date(currentWorkDay.pauseStart).getTime()
-          totalPauseMs += Date.now() - pauseStart
+        const pauseStart = currentWorkDay.pauseStart
+        if (currentWorkDay.isPaused && pauseStart !== null) {
+          totalPauseMs += Date.now() - new Date(pauseStart).getTime()
         }
 
         const result = totalTime - totalPauseMs
@@ -183,8 +214,8 @@ export const useWorkDayStore = create<WorkDayStore>()(
         let totalPause = currentWorkDay.totalPauseMinutes * 60000
 
         // Add current paused time if currently paused
-        if (currentWorkDay.isPaused && currentWorkDay.pauseStart) {
-          const pauseStart = new Date(currentWorkDay.pauseStart).getTime()
+        if (currentWorkDay.isPaused && currentWorkDay.pauseStart !== null) {
+          const pauseStart = new Date(currentWorkDay.pauseStart!).getTime()
           totalPause += Date.now() - pauseStart
         }
 

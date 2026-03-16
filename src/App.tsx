@@ -48,7 +48,7 @@ function App() {
   const location = useLocation()
   
   const { addCategory, updateCategory, deleteCategory, getActiveCategories } = useCategoryStore()
-  const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
+  const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, resumeEndedWorkDay, endWorkDay } = useWorkDayStore()
   useTrackingStore()
 
   const activeCategories = getActiveCategories()
@@ -64,8 +64,7 @@ function App() {
   // NUR wenn:
   // 1. Tag wurde BEendet (currentWorkDay.endTime existiert)
   // 2. Der Dialog noch nicht offen ist
-  // 3. Es nicht vom Button kam (feierabendFromButton)
-  // 4. Das Flag für diese Session wurde noch nicht gesetzt (verhindert Endlosschleife)
+  // 3. Das Flag für diesen Tag wurde noch nicht gesetzt (verhindert Endlosschleife)
   useEffect(() => {
     if (!currentWorkDay || !currentWorkDay.endTime || isFeierabendDialogOpen) {
       return
@@ -73,31 +72,15 @@ function App() {
 
     const today = getTodayDate()
     
-    // WICHTIG: Prüfe, ob der Dialog für diesen Tag in dieser Session schon geöffnet wurde
-    // Dazu prüfen wir: Ist der Dialog gerade eben geschlossen worden? (feierabendFromButton = true)
-    // Oder wurde das Flag schon gesetzt? (dann ist es ein Neuladen)
-    if (feierabendFromButton) {
-      // Dialog wurde vom Button geöffnet -> nicht automatisch wieder öffnen
-      return
-    }
-    
     // Prüfe, ob für diesen Tag bereits die Übersicht angezeigt wurde (persistiert)
     const tagHatUebersicht = isDayOverviewShown(today)
     
+    // NUR wenn das Flag NICHT gesetzt ist, setze das Flag ZUERST, dann öffne den Dialog
     if (!tagHatUebersicht) {
-      // Öffne den Dialog zum ersten Mal
-      setIsFeierabendDialogOpen(true)
+      markDayOverviewShown(today)  // Flag setzen ZUERST!
+      setIsFeierabendDialogOpen(true)  // Dann Dialog öffnen
     }
-  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton])
-
-  // Wenn der Dialog geschlossen wird, setze das Flag für diesen Tag
-  useEffect(() => {
-    if (!isFeierabendDialogOpen && currentWorkDay?.endTime && !feierabendFromButton) {
-      // Dialog wurde geschlossen - markiere Tag als "Übersicht angezeigt"
-      markDayOverviewShown(currentWorkDay.date)
-      setDayHasOverview(true)
-    }
-  }, [isFeierabendDialogOpen, currentWorkDay?.date, feierabendFromButton])
+  }, [currentWorkDay?.endTime, isFeierabendDialogOpen])
 
   // Reset feierabendFromButton, wenn Dialog nicht geöffnet wird
   // (damit manuelle Öffnung funktioniert)
@@ -169,7 +152,7 @@ function App() {
     if (currentWorkDay.endTime) {
       return {
         status: 'ended' as const,
-        label: 'Arbeitstag beendet — Klicke Start für neuen Tag',
+        label: 'Arbeitstag beendet — Klicke Start zum Fortfahren',
         colorClass: 'text-blue-600 dark:text-blue-400',
       }
     }
@@ -222,19 +205,19 @@ function App() {
       pauseWorkDay()
     } else if (status.status === 'paused') {
       resumeWorkDay()
+    } else if (status.status === 'ended') {
+      resumeEndedWorkDay()
     }
   }
 
   const handleEndWorkDay = () => {
     // Beende Arbeitstag
     endWorkDay()
-    // Setze Flag, dass der Dialog vom Button kam (kein Spruch anzeigen)
-    setFeierabendFromButton(true)
     // Setze Flag, dass Übersicht angezeigt wurde (damit bei Neuladen nicht automatisch wieder geöffnet)
     const today = getTodayDate()
     markDayOverviewShown(today)
     setDayHasOverview(true)
-    // Öffne FeierabendDialog manuell (ohne Spruch)
+    // Öffne FeierabendDialog manuell (ohne Spruch, da Flag gesetzt wurde)
     setIsFeierabendDialogOpen(true)
   }
 
@@ -328,8 +311,8 @@ function App() {
                           : 'bg-muted text-muted-foreground cursor-not-allowed'
                   )}
                   onClick={handleStartPause}
-                  disabled={status.status === 'running'}
-                  aria-label={status.status === 'running' ? 'Pause' : 'Start'}
+                  disabled={status.status === 'running' || status.status === 'paused'}
+                  aria-label={status.status === 'running' ? 'Pause' : status.status === 'ended' ? 'Fortfahren' : 'Start'}
                 >
                   {status.status === 'running' ? (
                     <Pause className="h-6 w-6" />
@@ -354,7 +337,7 @@ function App() {
                       {formatDuration(workTime)}
                     </div>
                     {status.status === 'ended' && (
-                      <div className="text-xs text-muted-foreground">Beendet — Klicke Start für neuen Tag</div>
+                      <div className="text-xs text-muted-foreground">Beendet — Klicke Start zum Fortfahren</div>
                     )}
                   </div>
                 </div>

@@ -12,7 +12,7 @@ interface WorkDayStatus {
 }
 
 const WorkDayControls = () => {
-  const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
+  const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, resumeEndedWorkDay, endWorkDay } = useWorkDayStore()
 
   // Determine current status
   const getStatus = (): WorkDayStatus => {
@@ -151,6 +151,19 @@ const WorkDayControls = () => {
             >
               <Play className="w-6 h-6 mr-2" />
               Weiter
+            </Button>
+          )}
+
+          {/* Resume Button - When day was ended */}
+          {status.status === 'ended' && (
+            <Button
+              variant="default"
+              size="lg"
+              className="h-16 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
+              onClick={resumeEndedWorkDay}
+            >
+              <Play className="w-6 h-6 mr-2" />
+              Tag fortsetzen
             </Button>
           )}
 

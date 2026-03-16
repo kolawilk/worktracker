@@ -17,7 +17,7 @@ interface SyncStore {
 
 export const useSyncStore = create<SyncStore>()(() => ({
   onWorkDayPause: () => {
-    const { session, stopTracking } = useTrackingStore.getState()
+    const { session, pauseTracking } = useTrackingStore.getState()
     
     // Wenn Tracking läuft, pausieren (zeitEintrag speichern, aber nicht komplett stoppen)
     if (session.isRunning && session.categoryId) {
@@ -36,8 +36,8 @@ export const useSyncStore = create<SyncStore>()(() => ({
       // Store the last active category for resume
       lastActiveCategoryId = session.categoryId
       
-      // Stop tracking (reset session)
-      stopTracking()
+      // Session direkt zurücksetzen (pauseTracking() aufrufen, um Doppelzählung zu verhindern!)
+      pauseTracking()
     }
   },
 
@@ -63,11 +63,11 @@ export const useSyncStore = create<SyncStore>()(() => ({
   },
 
   onCategoryClick: (categoryId: string) => {
-    const { session, startTracking, stopTracking } = useTrackingStore.getState()
+    const { session, startTracking, pauseTracking } = useTrackingStore.getState()
     
     // Wenn dieselbe Kategorie angeklickt wird und sie aktiv ist → stoppen
     if (session.categoryId === categoryId && session.isRunning) {
-      stopTracking()
+      pauseTracking()
     } 
     // Wenn andere Kategorie angeklickt wird → wechseln
     else if (session.categoryId !== categoryId) {
@@ -76,12 +76,16 @@ export const useSyncStore = create<SyncStore>()(() => ({
         const endTime = new Date()
         const date = endTime.toISOString().split('T')[0]
         
+        // ZeitEintrag speichern
         useTimeEntryStore.getState().addTimeEntry({
           categoryId: session.categoryId,
           startTime: session.startTime!,
           endTime: endTime.toISOString(),
           date,
         })
+        
+        // Session direkt zurücksetzen (pauseTracking() aufrufen, um Doppelzählung zu verhindern!)
+        pauseTracking()
       }
       
       // Neue Kategorie starten

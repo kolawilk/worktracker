@@ -12,6 +12,7 @@ interface TrackingStore {
   session: TrackingSession
   startTracking: (categoryId: string) => void
   stopTracking: () => void
+  pauseTracking: () => void
   getCurrentDuration: () => number
 }
 
@@ -69,6 +70,22 @@ export const useTrackingStore = create<TrackingStore>()(
           date,
         })
 
+        set({
+          session: {
+            categoryId: null,
+            startTime: null,
+            isRunning: false,
+          },
+        })
+      },
+
+      pauseTracking: () => {
+        const { session } = get()
+        if (!session.isRunning || !session.startTime || !session.categoryId) {
+          return
+        }
+
+        // Session direkt zurücksetzen, OHNE Entry zu speichern (Entry wurde bereits manuell gespeichert)
         set({
           session: {
             categoryId: null,
