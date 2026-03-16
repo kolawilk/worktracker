@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useTrackingStore } from '@/stores/trackingStore'
@@ -17,13 +18,31 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
   ({ category, onSelect, onEdit, onDelete, onLongPress }, ref) => {
     const [isHovered, setIsHovered] = React.useState(false)
     const [isPressed, setIsPressed] = React.useState(false)
+    const [displayDuration, setDisplayDuration] = React.useState(0)
     const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     
     const { session, getCurrentDuration } = useTrackingStore()
     const { onCategoryClick } = useSyncStore()
     
     const isActive = session.categoryId === category.id && session.isRunning
-    const duration = getCurrentDuration()
+    
+    // 🔥 FIX: Aktualisiere Kategorie-Zeit alle 100ms automatisch, nicht nur bei Hover
+    useEffect(() => {
+      if (!isActive) return
+      
+      const updateInterval = setInterval(() => {
+        setDisplayDuration(getCurrentDuration())
+      }, 100)  // 100ms für flüssige Anzeige (10 FPS für Timer)
+      
+      return () => clearInterval(updateInterval)
+    }, [isActive, getCurrentDuration])
+    
+    // Initialwert setzen
+    useEffect(() => {
+      if (isActive) {
+        setDisplayDuration(getCurrentDuration())
+      }
+    }, [isActive, getCurrentDuration])
     
     const formatDuration = (seconds: number): string => {
       const hours = Math.floor(seconds / 3600)
@@ -116,7 +135,7 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
 
         {isActive && (
           <div className="px-3 py-1 rounded-full bg-primary/10 text-primary font-mono text-sm">
-            {formatDuration(duration)}
+            {formatDuration(displayDuration)}
           </div>
         )}
 

@@ -54,10 +54,11 @@ export const useTimeEntryStore = create<TimeEntryStore>()(
           entries = entries.filter((entry) => entry.date === date)
         }
 
+        // FIX:返回毫秒,不是秒 (之前错误地除以了1000)
         return entries.reduce((total, entry) => {
           const start = new Date(entry.startTime).getTime()
           const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now()
-          return total + Math.floor((end - start) / 1000)
+          return total + (end - start)  // ←返回毫秒
         }, 0)
       },
     }),

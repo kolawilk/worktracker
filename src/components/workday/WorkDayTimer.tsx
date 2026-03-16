@@ -28,10 +28,12 @@ const padNumber = (num: number, digits: number = 2): string => {
 const formatDuration = (ms: number): string => {
   const { hours, minutes, seconds } = formatTime(ms)
 
+  // IMMER HH:MM:SS formatieren (nie MM:SS für Gesamtzeit!)
   if (hours > 0) {
     return `${padNumber(hours)}:${padNumber(minutes)}:${padNumber(seconds)}`
   }
-  return `${padNumber(minutes)}:${padNumber(seconds)}`
+  // Wenn keine Stunden, aber Minuten > 0: 00:MM:SS
+  return `${padNumber(0)}:${padNumber(minutes)}:${padNumber(seconds)}`
 }
 
 const formatPauseDuration = (ms: number): string => {

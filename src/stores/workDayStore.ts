@@ -2,8 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { WorkDay } from '@/types'
 import { useSyncStore } from './syncStore'
+import { useTrackingStore } from './trackingStore'
 import { playStartSound, playPauseSound, playResumeSound, playEndSound } from '@/lib/sounds'
 import { useSettingsStore } from './settingsStore'
+import { useTimeEntryStore } from './timeEntryStore'
 
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
@@ -138,15 +140,34 @@ export const useWorkDayStore = create<WorkDayStore>()(
           return 0
         }
 
-        const start = new Date(currentWorkDay.startTime).getTime()
-        const end = currentWorkDay.endTime 
-          ? new Date(currentWorkDay.endTime).getTime() 
-          : Date.now()
+        // 1. Summiere alle timeEntries für diesen Tag
+        const { timeEntries } = useTimeEntryStore.getState()
+        const today = currentWorkDay.date
+        const todayEntries = timeEntries.filter(entry => entry.date === today)
         
-        const grossTime = end - start
-        const pauseTimeMs = currentWorkDay.totalPauseMinutes * 60000
-        
-        return grossTime - pauseTimeMs
+        let totalTime = todayEntries.reduce((total, entry) => {
+          const start = new Date(entry.startTime).getTime()
+          // entry.endTime ist immer gesetzt, da timeEntry nur gespeichert wird, wenn Tracking beendet wird
+          const end = entry.endTime ? new Date(entry.endTime).getTime() : start
+          return total + (end - start)
+        }, 0)
+
+        // 2. Addiere die aktuelle laufende Session (falls existiert)
+        const { session } = useTrackingStore.getState()
+        if (session.isRunning && session.startTime && session.categoryId) {
+          const sessionStart = new Date(session.startTime).getTime()
+          totalTime += Date.now() - sessionStart
+        }
+
+        // 3. Subtrahiere Pausenzeit (inkl. aktuelle Pausen-Dauer falls pausiert)
+        let totalPauseMs = currentWorkDay.totalPauseMinutes * 60000
+        if (currentWorkDay.isPaused && currentWorkDay.pauseStart) {
+          const pauseStart = new Date(currentWorkDay.pauseStart).getTime()
+          totalPauseMs += Date.now() - pauseStart
+        }
+
+        const result = totalTime - totalPauseMs
+        return result > 0 ? result : 0  // 🔒 Verhindere negative Zeiten
       },
 
       getPauseTime: () => {
@@ -163,7 +184,7 @@ export const useWorkDayStore = create<WorkDayStore>()(
           totalPause += Date.now() - pauseStart
         }
 
-        return totalPause
+        return totalPause > 0 ? totalPause : 0  // 🔒 Verhindere negative Pausenzeit
       },
     }),
     {
