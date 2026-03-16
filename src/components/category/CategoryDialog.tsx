@@ -86,22 +86,21 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
 
             <div className="space-y-2">
               <Label htmlFor="category-emoji">Emoji</Label>
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2">
-                  <Input
-                    id="category-emoji"
-                    value={emoji}
-                    onChange={handleEmojiInput}
-                    placeholder=" z.B. 💼, 🏠, 📊"
-                    maxLength={2}
-                    required
-                  />
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-md border bg-accent text-2xl"
-                    aria-hidden="true"
-                  >
-                    {emoji || '❓'}
-                  </div>
+              <div className="space-y-2">
+                <Input
+                  id="category-emoji"
+                  value={emoji}
+                  onChange={handleEmojiInput}
+                  placeholder=" z.B. 💼, 🏠, 📊"
+                  maxLength={2}
+                  required
+                  className="font-text"
+                />
+                <div
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md border bg-accent text-2xl"
+                  aria-hidden="true"
+                >
+                  {emoji || '❓'}
                 </div>
               </div>
             </div>
@@ -128,11 +127,11 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
               </div>
             </div>
 
-            <DialogFooter className="flex-row justify-between sm:justify-between">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto h-12 text-lg">
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={!name.trim() || !emoji.trim()}>
+              <Button type="submit" disabled={!name.trim() || !emoji.trim()} className="w-full sm:w-auto h-12 text-lg">
                 {mode === 'create' ? 'Speichern' : 'Änderungen speichern'}
               </Button>
             </DialogFooter>
