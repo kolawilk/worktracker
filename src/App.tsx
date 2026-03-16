@@ -8,6 +8,7 @@ import { useWorkDayStore } from '@/stores/workDayStore'
 import { Link, Routes, Route, useLocation } from 'react-router-dom'
 import WeekPage from '@/pages/WeekPage'
 import DayPage from '@/pages/DayPage'
+import WeeklyReportPage from '@/pages/WeeklyReportPage'
 import AnalyticsPage from '@/pages/AnalyticsPage'
 import SettingsPage from '@/pages/SettingsPage'
 import type { Category } from '@/types'
@@ -189,9 +190,18 @@ function App() {
               <List className="h-5 w-5" />
             </Button>
           </Link>
-          <Link to="/week" title="Wochen-Auswertung">
+          <Link to="/week" title="Wochen-Übersicht">
             <Button 
               variant={location.pathname === '/week' ? 'default' : 'ghost'} 
+              className="rounded-xl"
+              size="icon"
+            >
+              📅
+            </Button>
+          </Link>
+          <Link to="/weekly-report" title="Wochen-Auswertung">
+            <Button 
+              variant={location.pathname === '/weekly-report' ? 'default' : 'ghost'} 
               className="rounded-xl"
               size="icon"
             >
@@ -321,6 +331,10 @@ function App() {
             <Route 
               path="/week" 
               element={<WeekPage />} 
+            />
+            <Route 
+              path="/weekly-report" 
+              element={<WeeklyReportPage />} 
             />
             <Route 
               path="/analytics" 

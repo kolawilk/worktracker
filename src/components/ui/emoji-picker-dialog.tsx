@@ -24,18 +24,22 @@ const EmojiPickerDialog = React.forwardRef<
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent ref={ref} className="max-w-4xl sm:max-w-5xl md:max-w-6xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl md:text-3xl">Emoji wählen</DialogTitle>
+      <DialogContent 
+        ref={ref} 
+        className="max-w-[95vw] sm:max-w-[600px] md:max-w-[700px] p-0 overflow-hidden border-white/20 bg-black/40 backdrop-blur-xl"
+      >
+        <DialogHeader className="px-4 pt-4 pb-2">
+          <DialogTitle className="text-xl sm:text-2xl text-white/90">Emoji wählen</DialogTitle>
         </DialogHeader>
 
-        <div className="h-[60vh] w-full overflow-hidden rounded-lg border sm:h-[50vh] md:h-[60vh]">
+        <div className="w-full overflow-hidden emoji-picker-container">
           <EmojiPicker 
             onEmojiClick={onEmojiClick} 
-            theme={Theme.DARK} 
+            theme={Theme.DARK}
             width="100%" 
-            height="100%"
+            height="400px"
             searchPlaceholder="Emojis durchsuchen..."
+            lazyLoadEmojis={true}
           />
         </div>
       </DialogContent>

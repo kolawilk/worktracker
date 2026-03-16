@@ -66,3 +66,112 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Emoji Picker Styles - Glass Chic Design */
+.emoji-picker-container {
+  --epr-bg-color: rgba(0, 0, 0, 0.3);
+  --epr-category-label-bg-color: rgba(0, 0, 0, 0.5);
+  --epr-search-input-bg-color: rgba(255, 255, 255, 0.1);
+  --epr-search-input-border-color: rgba(255, 255, 255, 0.2);
+  --epr-search-input-text-color: rgba(255, 255, 255, 0.9);
+  --epr-search-input-placeholder-color: rgba(255, 255, 255, 0.5);
+  --epr-search-input-height: 48px;
+  --epr-search-input-padding: 0 16px;
+  --epr-search-input-border-radius: 12px;
+  --epr-search-input-font-size: 16px;
+  --epr-emoji-size: 44px;
+  --epr-emoji-padding: 8px;
+  --epr-hover-bg-color: rgba(255, 255, 255, 0.15);
+  --epr-focus-bg-color: rgba(255, 255, 255, 0.2);
+  --epr-text-color: rgba(255, 255, 255, 0.9);
+  --epr-category-label-text-color: rgba(255, 255, 255, 0.7);
+  --epr-skin-tone-picker-bg-color: rgba(0, 0, 0, 0.5);
+  --epr-active-skin-tone-indicator-bg-color: rgba(255, 255, 255, 0.3);
+  --epr-skin-tone-item-hover-bg-color: rgba(255, 255, 255, 0.2);
+  --epr-scroll-handle-bg-color: rgba(255, 255, 255, 0.3);
+  --epr-scroll-handle-hover-bg-color: rgba(255, 255, 255, 0.5);
+}
+
+/* iPad-optimierte Touch-Targets */
+.emoji-picker-container .EmojiPickerReact {
+  --epr-emoji-size: 48px !important;
+  --epr-emoji-padding: 10px !important;
+}
+
+.emoji-picker-container .epr-search-container input {
+  height: 48px !important;
+  font-size: 17px !important;
+  border-radius: 12px !important;
+  padding: 0 16px !important;
+}
+
+.emoji-picker-container .epr-category-nav {
+  padding: 12px 8px !important;
+}
+
+.emoji-picker-container .epr-category-nav button {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+.emoji-picker-container .epr-emoji-category-label {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  padding: 12px 16px !important;
+  backdrop-filter: blur(8px);
+}
+
+.emoji-picker-container .epr-emoji-category-content button {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
+  font-size: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  transition: all 0.15s ease !important;
+}
+
+.emoji-picker-container .epr-emoji-category-content button:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.1);
+}
+
+.emoji-picker-container .epr-emoji-category-content button:active {
+  transform: scale(0.95);
+}
+
+/* Skin tone picker */
+.emoji-picker-container .epr-skin-tones {
+  padding: 8px !important;
+}
+
+.emoji-picker-container .epr-skin-tone-item {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+}
+
+/* Scrollbar styling */
+.emoji-picker-container .epr-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.emoji-picker-container .epr-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.emoji-picker-container .epr-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.emoji-picker-container .epr-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
