@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
+import { useWorkDayStore } from '@/stores/workDayStore'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { TimeEntryList } from '@/components/time-entry/TimeEntryList'
 import { TimeEntryDialog } from '@/components/time-entry/TimeEntryDialog'
@@ -8,6 +9,7 @@ import { formatDurationHHMM } from '@/lib/week'
 
 function DayPage() {
   const { timeEntries, updateTimeEntry, deleteTimeEntry } = useTimeEntryStore()
+  const { getTotalWorkTime } = useWorkDayStore()
   const { categories } = useCategoryStore()
   
   const [editingEntry, setEditingEntry] = useState<string | undefined>(undefined)
@@ -16,14 +18,9 @@ function DayPage() {
   // Heutiges Datum (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0]
 
-  // Berechne Gesamtzeit für heute (in Sekunden für formatDurationHHMM)
-  const totalSeconds = timeEntries
-    .filter(entry => entry.date === today)
-    .reduce((sum, entry) => {
-      const start = new Date(entry.startTime).getTime()
-      const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now()
-      return sum + Math.floor((end - start) / 1000)
-    }, 0)
+  // ✅ Konsistente Berechnung: workDayStore.getTotalWorkTime() nutzt dieselbe Logik wie "Aktueller Tag"-Kachel
+  // Gibt Millisekunden zurück, formatDurationHHMM erwartet SEKUNDEN → /1000
+  const totalSeconds = Math.floor(getTotalWorkTime() / 1000)
 
   // Öffne Dialog zum Bearbeiten
   const handleEdit = (entryId: string) => {
