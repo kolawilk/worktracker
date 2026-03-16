@@ -57,10 +57,12 @@ const WorkDayToolbar = () => {
     const minutes = Math.floor((seconds % 3600) / 60)
     const secs = seconds % 60
     
+    // IMMER HH:MM:SS formatieren (nie MM:SS für Gesamtzeit!)
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`
+    // Wenn keine Stunden, aber Minuten > 0: 00:MM:SS
+    return `${0}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   // Calculate total work time
