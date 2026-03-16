@@ -42,36 +42,12 @@ const formatPauseDuration = (ms: number): string => {
 }
 
 const WorkDayTimer = () => {
-  const { currentWorkDay } = useWorkDayStore()
+  const { currentWorkDay, getTotalWorkTime, getPauseTime } = useWorkDayStore()
   const [displayTime, setDisplayTime] = useState(0)
   const [displayPause, setDisplayPause] = useState(0)
 
   useEffect(() => {
     // Update immediately on mount or when store changes
-    const getTotalWorkTime = () => {
-      if (!currentWorkDay) return 0
-      const start = new Date(currentWorkDay.startTime).getTime()
-      const end = currentWorkDay.endTime ? new Date(currentWorkDay.endTime).getTime() : Date.now()
-      const grossTime = end - start
-      const pauseTimeMs = currentWorkDay.totalPauseMinutes * 60000
-      let totalPauseMs = pauseTimeMs
-      const pauseStart = currentWorkDay.pauseStart
-      if (currentWorkDay.isPaused && pauseStart !== null) {
-        totalPauseMs += Date.now() - new Date(pauseStart).getTime()
-      }
-      return Math.max(0, grossTime - totalPauseMs)
-    }
-
-    const getPauseTime = () => {
-      if (!currentWorkDay) return 0
-      let totalPause = currentWorkDay.totalPauseMinutes * 60000
-      if (currentWorkDay.isPaused && currentWorkDay.pauseStart !== null) {
-        const pauseStart = new Date(currentWorkDay.pauseStart!).getTime()
-        totalPause += Date.now() - pauseStart
-      }
-      return Math.max(0, totalPause)
-    }
-
     setDisplayTime(getTotalWorkTime())
     setDisplayPause(getPauseTime())
 
@@ -82,7 +58,7 @@ const WorkDayTimer = () => {
     }, 1000)
 
     return () => clearInterval(updateInterval)
-  }, [currentWorkDay]) // 🔥 FIX: Nur currentWorkDay als Dependency, keine Funktionen
+  }, [currentWorkDay, getTotalWorkTime, getPauseTime]) // 🔥 Nutze Store-Funktionen für konsistente Berechnung
 
   // Check if currently paused
   const isPaused = currentWorkDay?.isPaused ?? false
@@ -112,12 +88,20 @@ const WorkDayTimer = () => {
   return (
     <Card className={cn(
       "w-full max-w-2xl mx-auto shadow-lg border-primary ring-1 ring-primary/20 transition-all duration-300",
-      isPaused && "opacity-90"
+      isPaused && "bg-yellow-50 dark:bg-yellow-900/20 ring-yellow-500/30"
     )}>
-      <CardHeader className="bg-primary/5 border-b border-primary/10">
+      <CardHeader className={cn(
+        "bg-primary/5 border-b border-primary/10",
+        isPaused && "bg-yellow-100/50 dark:bg-yellow-900/30"
+      )}>
         <CardTitle className="text-xl text-foreground flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
-          Aktuelle Arbeitszeit
+          <span>Aktuelle Arbeitszeit</span>
+          {isPaused && (
+            <span className="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 text-xs font-medium">
+              PAUSE
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       
@@ -139,19 +123,26 @@ const WorkDayTimer = () => {
           )}>
             {formatDuration(displayTime)}
           </div>
-          <div className="mt-2 text-sm text-muted-foreground font-medium">
-            {isPaused ? "Zeit pausiert" : "Zeit läuft..."}
+          <div className="mt-2 text-sm text-muted-foreground font-medium flex items-center justify-center gap-2">
+            {isPaused ? (
+              <>
+                <Coffee className="w-4 h-4" />
+                Zeit pausiert
+              </>
+            ) : (
+              "Zeit läuft..."
+            )}
           </div>
         </div>
 
         {/* Pause Time Display */}
         {isPaused && (
-          <div className="pt-4 border-t border-dashed border-primary/10">
-            <div className="flex items-center justify-center gap-2 mb-2 text-sm font-medium text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">
+          <div className="pt-4 border-t border-dashed border-yellow-200/50 dark:border-yellow-800/50">
+            <div className="flex items-center justify-center gap-2 mb-2 text-sm font-medium text-yellow-700 dark:text-yellow-400 uppercase tracking-wider">
               <Coffee className="w-4 h-4" />
               Pausenzeit
             </div>
-            <div className="font-mono text-4xl sm:text-5xl font-bold text-yellow-600 dark:text-yellow-400 tracking-tighter">
+            <div className="font-mono text-4xl sm:text-5xl font-bold text-yellow-700 dark:text-yellow-400 tracking-tighter">
               {formatPauseDuration(displayPause)}
             </div>
           </div>
