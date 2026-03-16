@@ -82,6 +82,12 @@ export const useSyncStore = create<SyncStore>()(() => ({
       resumeEndedWorkDay()
     }
     
+    // ✅ FIX: Wenn kein Tracking läuft, aber Arbeitstag existiert, Kategorie direkt starten
+    if (!session.isRunning) {
+      startTracking(categoryId)
+      return
+    }
+    
     // Wenn dieselbe Kategorie angeklickt wird und sie aktiv ist → stoppen
     if (session.categoryId === categoryId && session.isRunning) {
       pauseTracking()
