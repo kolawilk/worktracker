@@ -48,17 +48,29 @@ export const useTimeEntryStore = create<TimeEntryStore>()(
 
       getTotalTimeByCategory: (categoryId, date) => {
         const { timeEntries } = get()
+        
+        // Filtere Entries nach Kategorie
         let entries = timeEntries.filter((entry) => entry.categoryId === categoryId)
         
+        // Filtere nach Datum, wenn angegeben
         if (date) {
           entries = entries.filter((entry) => entry.date === date)
         }
 
-        // Gibt Millisekunden zurück (konsistent mit workDayStore)
+        // Berechne Gesamtzeit in Millisekunden
+        // WICHTIG: Nur abgeschlossene Entries (mit endTime) mit endTime berechnen,
+        // laufende Entries (ohne endTime) NUR mit Date.now()
         return entries.reduce((total, entry) => {
           const start = new Date(entry.startTime).getTime()
-          const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now()
-          return total + (end - start)
+          
+          // Wenn Entry abgeschlossen ist (endTime vorhanden)
+          if (entry.endTime) {
+            const end = new Date(entry.endTime).getTime()
+            return total + (end - start)
+          }
+          
+          // Wenn Entry noch läuft (kein endTime), berechne bis jetzt
+          return total + (Date.now() - start)
         }, 0)
       },
     }),

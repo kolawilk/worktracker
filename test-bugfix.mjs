@@ -20,7 +20,7 @@ async function runTest() {
   console.log('⏱️  Warte auf Server (Port 5196)...');
   await new Promise(resolve => setTimeout(resolve, 3000));
   
-  let port = 5196;
+  let port = 5200;
   console.log(`🌐 Server läuft auf http://localhost:${port}`);
   
   // Öffne Browser mit Playwright

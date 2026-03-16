@@ -18,15 +18,14 @@ interface SyncStore {
 
 export const useSyncStore = create<SyncStore>()(() => ({
   onWorkDayPause: () => {
-    const { session, pauseTracking } = useTrackingStore.getState()
+    const { session, stopTracking } = useTrackingStore.getState()
     
-    // Wenn Tracking läuft, pausieren (zeitEintrag speichern, aber nicht komplett stoppen)
+    // Wenn Tracking läuft, beenden ( Entry speichern!)
     if (session.isRunning && session.categoryId) {
-      // Save current tracking session
+      // Speichere Entry mit aktueller Zeit als endTime
       const endTime = new Date()
       const date = endTime.toISOString().split('T')[0]
       
-      // Save the entry for the currently tracked category
       useTimeEntryStore.getState().addTimeEntry({
         categoryId: session.categoryId,
         startTime: session.startTime!,
@@ -37,8 +36,8 @@ export const useSyncStore = create<SyncStore>()(() => ({
       // Store the last active category for resume
       lastActiveCategoryId = session.categoryId
       
-      // Session direkt zurücksetzen (pauseTracking() aufrufen, um Doppelzählung zu verhindern!)
-      pauseTracking()
+      // Session stoppen (nicht pauseTracking!)
+      stopTracking()
     }
   },
 
@@ -64,7 +63,7 @@ export const useSyncStore = create<SyncStore>()(() => ({
   },
 
   onCategoryClick: (categoryId: string) => {
-    const { session, startTracking, pauseTracking } = useTrackingStore.getState()
+    const { session, startTracking, stopTracking } = useTrackingStore.getState()
     
     // 🔥 FIX: Arbeitstag automatisch starten/resumen, wenn nicht gestartet
     const { currentWorkDay, startWorkDay, resumeWorkDay, resumeEndedWorkDay } = useWorkDayStore.getState()
@@ -82,7 +81,7 @@ export const useSyncStore = create<SyncStore>()(() => ({
       resumeEndedWorkDay()
     }
     
-    // ✅ FIX: Wenn kein Tracking läuft, aber Arbeitstag existiert, Kategorie direkt starten
+    // Wenn keine Session läuft, Kategorie direkt starten
     if (!session.isRunning) {
       startTracking(categoryId)
       return
@@ -90,7 +89,7 @@ export const useSyncStore = create<SyncStore>()(() => ({
     
     // Wenn dieselbe Kategorie angeklickt wird und sie aktiv ist → stoppen
     if (session.categoryId === categoryId && session.isRunning) {
-      pauseTracking()
+      stopTracking()
     } 
     // Wenn andere Kategorie angeklickt wird → wechseln
     else if (session.categoryId !== categoryId) {
@@ -107,8 +106,8 @@ export const useSyncStore = create<SyncStore>()(() => ({
           date,
         })
         
-        // Session direkt zurücksetzen (pauseTracking() aufrufen, um Doppelzählung zu verhindern!)
-        pauseTracking()
+        // Session stoppen
+        stopTracking()
       }
       
       // Neue Kategorie starten

@@ -5,10 +5,7 @@ import { useSyncStore } from './syncStore'
 import { playStartSound, playPauseSound, playResumeSound, playEndSound } from '@/lib/sounds'
 import { useSettingsStore } from './settingsStore'
 import { useTimeEntryStore } from './timeEntryStore'
-
-// Hilfsfunktionen für localStorage-Flags
-// WICHTIG: clearDayOverviewFlag ist absichtlich entfernt worden, da das Flag
-// nur beim Start eines NEUEN Tages gesetzt wird (nicht gelöscht werden soll)
+import { useTrackingStore } from './trackingStore'
 
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
@@ -166,25 +163,35 @@ export const useWorkDayStore = create<WorkDayStore>()(
           return 0
         }
 
-        // Zeit-Berechnung:
-        // 1. Alle timeEntries addieren (laufende und beendete)
-        // 2. Pause abziehen
-        
         const { timeEntries } = useTimeEntryStore.getState()
+        const trackingSession = useTrackingStore.getState().session
         
         const today = currentWorkDay.date
         const todayEntries = timeEntries.filter(entry => entry.date === today)
         
-        // Zähle ALLE timeEntries des heutigen Tages
-        let totalTime = todayEntries.reduce((total, entry) => {
-          const start = new Date(entry.startTime).getTime()
-          const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now()
-          return total + (end - start)
+        // 🔒 KORREKTE ZEIT-BERECHNUNG:
+        // 1. Alle abgeschlossenen Entries des heutigen Tages (mit endTime)
+        // 2. AUsCHLIESSLICH: die aktuelle laufende Session (entweder als Entry OHNE endTime ODER als trackingStore.session)
+        // 3. Pausenzeit abziehen
+        
+        let totalTime = 0
+        
+        // Zähle alle ABGESCHLOSSENEN Entries (mit endTime)
+        totalTime += todayEntries.reduce((total, entry) => {
+          if (entry.endTime) {
+            const start = new Date(entry.startTime).getTime()
+            const end = new Date(entry.endTime).getTime()
+            return total + (end - start)
+          }
+          return total
         }, 0)
-
-        // WICHTIG: Wenn KEINE Session läuft, ist totalTime korrekt
-        // Wenn eine Session läuft, wurde sie IN den timeEntries gespeichert (siehe startTracking)
-        // Deshalb NICHT nochmal addieren!
+        
+        // 🔥 FIX: Addiere die aktuelle laufende Session AUS DEM TRACKING STORE
+        // Die Entry für die laufende Kategorie existiert NOCH NICHT (wird erst beim Stop gespeichert)
+        // Also nutzen wir die Dauer aus trackingStore.getCurrentDuration()
+        if (trackingSession.isRunning && trackingSession.startTime) {
+          totalTime += useTrackingStore.getState().getCurrentDuration()
+        }
         
         // Pausenzeit abziehen (inkl. aktuelle Pause falls pausiert)
         let totalPauseMs = currentWorkDay.totalPauseMinutes * 60000

@@ -30,21 +30,21 @@
         - generic [ref=e22]: ⏱️
         - text: Worktracker
       - generic [ref=e23]:
-        - button "Pause" [disabled]:
+        - button "Start" [disabled]:
           - img
         - generic [ref=e26]: 0:00
-        - button "Feierabend" [ref=e27] [cursor=pointer]:
-          - generic [ref=e28]:
-            - generic [ref=e29]: Feierabend
+        - button "Feierabend" [disabled]:
+          - generic:
+            - generic: Feierabend
             - img
-      - generic [ref=e30]:
-        - button "+ Neue Kategorie" [ref=e31] [cursor=pointer]
-        - button "Theme wechseln" [ref=e32] [cursor=pointer]:
+      - generic [ref=e27]:
+        - button "+ Neue Kategorie" [ref=e28] [cursor=pointer]
+        - button "Theme wechseln" [ref=e29] [cursor=pointer]:
           - img
-          - generic [ref=e33]: Theme wechseln
-    - generic [ref=e34]:
-      - paragraph [ref=e35]: Noch keine Kategorien vorhanden
-      - paragraph [ref=e36]: Erstelle deine erste Kategorie, um mit dem Tracking zu beginnen
-      - button "+ Neue Kategorie erstellen" [ref=e37] [cursor=pointer]
-    - paragraph [ref=e39]: Made with ❤️ and help from my AI friends
+          - generic [ref=e30]: Theme wechseln
+    - generic [ref=e31]:
+      - paragraph [ref=e32]: Noch keine Kategorien vorhanden
+      - paragraph [ref=e33]: Erstelle deine erste Kategorie, um mit dem Tracking zu beginnen
+      - button "+ Neue Kategorie erstellen" [ref=e34] [cursor=pointer]
+    - paragraph [ref=e36]: Made with ❤️ and help from my AI friends
 ```
