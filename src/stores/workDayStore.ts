@@ -7,6 +7,10 @@ import { playStartSound, playPauseSound, playResumeSound, playEndSound } from '@
 import { useSettingsStore } from './settingsStore'
 import { useTimeEntryStore } from './timeEntryStore'
 
+// Hilfsfunktionen für localStorage-Flags
+// WICHTIG: clearDayOverviewFlag ist absichtlich entfernt worden, da das Flag
+// nur beim Start eines NEUEN Tages gesetzt wird (nicht gelöscht werden soll)
+
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
   history: WorkDay[]

@@ -18,6 +18,25 @@ import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher'
 import { FeierabendDialog } from '@/components/workday/FeierabendDialog'
 import './App.css'
 
+// Hilfsfunktion: Gibt das heutige Datum als YYYY-MM-DD zurück
+const getTodayDate = (): string => {
+  return new Date().toISOString().split('T')[0]
+}
+
+// Hilfsfunktion: Prüft, ob die Tagesübersicht für einen bestimmten Tag bereits angezeigt wurde
+const isDayOverviewShown = (date: string): boolean => {
+  if (typeof window === 'undefined') return false
+  const key = `dayOverviewShown:${date}`
+  return localStorage.getItem(key) === 'true'
+}
+
+// Hilfsfunktion: Markiert einen Tag als "Tagesübersicht angezeigt"
+const markDayOverviewShown = (date: string): void => {
+  if (typeof window === 'undefined') return
+  const key = `dayOverviewShown:${date}`
+  localStorage.setItem(key, 'true')
+}
+
 function App() {
   const [mounted, setMounted] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -25,6 +44,7 @@ function App() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
   const [isFeierabendDialogOpen, setIsFeierabendDialogOpen] = useState(false)
   const [feierabendFromButton, setFeierabendFromButton] = useState(false)
+  const [, setDayHasOverview] = useState(false)
   const location = useLocation()
   
   const { addCategory, updateCategory, deleteCategory, getActiveCategories } = useCategoryStore()
@@ -33,19 +53,66 @@ function App() {
 
   const activeCategories = getActiveCategories()
 
-  // Öffne FeierabendDialog automatisch, wenn Arbeitstag beendet wird
+  // Prüfe beim Mount, ob für den aktuellen Tag bereits die Übersicht angezeigt wurde
   useEffect(() => {
-    if (currentWorkDay && currentWorkDay.endTime && !isFeierabendDialogOpen) {
-      // Öffne Dialog nur wenn es nicht vom Button kam
-      if (!feierabendFromButton) {
-        setIsFeierabendDialogOpen(true)
-      }
-      // Reset nach Öffnen
-      if (isFeierabendDialogOpen) {
+    if (currentWorkDay?.date) {
+      setDayHasOverview(isDayOverviewShown(currentWorkDay.date))
+    }
+  }, [currentWorkDay?.date])
+
+  // Öffne FeierabendDialog automatisch, wenn Arbeitstag beendet wird
+  // NUR wenn:
+  // 1. Tag wurde BEendet (currentWorkDay.endTime existiert)
+  // 2. Der Dialog noch nicht offen ist
+  // 3. Es nicht vom Button kam (feierabendFromButton)
+  // 4. Das Flag für diese Session wurde noch nicht gesetzt (verhindert Endlosschleife)
+  useEffect(() => {
+    if (!currentWorkDay || !currentWorkDay.endTime || isFeierabendDialogOpen) {
+      return
+    }
+
+    const today = getTodayDate()
+    
+    // WICHTIG: Prüfe, ob der Dialog für diesen Tag in dieser Session schon geöffnet wurde
+    // Dazu prüfen wir: Ist der Dialog gerade eben geschlossen worden? (feierabendFromButton = true)
+    // Oder wurde das Flag schon gesetzt? (dann ist es ein Neuladen)
+    if (feierabendFromButton) {
+      // Dialog wurde vom Button geöffnet -> nicht automatisch wieder öffnen
+      return
+    }
+    
+    // Prüfe, ob für diesen Tag bereits die Übersicht angezeigt wurde (persistiert)
+    const tagHatUebersicht = isDayOverviewShown(today)
+    
+    if (!tagHatUebersicht) {
+      // Öffne den Dialog zum ersten Mal
+      setIsFeierabendDialogOpen(true)
+    }
+  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton])
+
+  // Wenn der Dialog geschlossen wird, setze das Flag für diesen Tag
+  useEffect(() => {
+    if (!isFeierabendDialogOpen && currentWorkDay?.endTime && !feierabendFromButton) {
+      // Dialog wurde geschlossen - markiere Tag als "Übersicht angezeigt"
+      markDayOverviewShown(currentWorkDay.date)
+      setDayHasOverview(true)
+    }
+  }, [isFeierabendDialogOpen, currentWorkDay?.date, feierabendFromButton])
+
+  // Reset feierabendFromButton, wenn Dialog nicht geöffnet wird
+  // (damit manuelle Öffnung funktioniert)
+  useEffect(() => {
+    if (currentWorkDay?.endTime && !isFeierabendDialogOpen) {
+      const today = getTodayDate()
+      const tagHatUebersicht = isDayOverviewShown(today)
+      
+      // Wenn das Flag gesetzt ist (Dialog wird nicht automatisch geöffnet)
+      // und feierabendFromButton noch true ist, resetten
+      if (tagHatUebersicht && feierabendFromButton) {
         setFeierabendFromButton(false)
       }
     }
-  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton])
+  }, [isFeierabendDialogOpen, currentWorkDay?.date, feierabendFromButton])
 
   const isWeekPage = location.pathname === '/week'
   const isDayPage = location.pathname === '/day'
@@ -163,6 +230,10 @@ function App() {
     endWorkDay()
     // Setze Flag, dass der Dialog vom Button kam (kein Spruch anzeigen)
     setFeierabendFromButton(true)
+    // Setze Flag, dass Übersicht angezeigt wurde (damit bei Neuladen nicht automatisch wieder geöffnet)
+    const today = getTodayDate()
+    markDayOverviewShown(today)
+    setDayHasOverview(true)
     // Öffne FeierabendDialog manuell (ohne Spruch)
     setIsFeierabendDialogOpen(true)
   }
