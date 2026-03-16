@@ -69,12 +69,10 @@ export function FeierabendDialog({ isOpen, onClose, showQuote = true }: Feierabe
     // Zeit für jeden Eintrag zählen (nur aktueller Tag)
     if (currentWorkDay) {
       const today = currentWorkDay.date
-      const currentDate = new Date(today).toISOString().split('T')[0]
       
       timeEntries.forEach(entry => {
         // Nur Einträge vom aktuellen Tag berücksichtigen
-        const entryDate = new Date(entry.date).toISOString().split('T')[0]
-        if (entryDate === currentDate) {
+        if (entry.date === today) {
           const catData = categoryMap.get(entry.categoryId)
           if (catData) {
             // Dauer berechnen
