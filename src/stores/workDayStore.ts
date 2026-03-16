@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { WorkDay } from '@/types'
 import { useSyncStore } from './syncStore'
+import { useTrackingStore } from './trackingStore'
 import { playStartSound, playPauseSound, playResumeSound, playEndSound } from '@/lib/sounds'
 import { useSettingsStore } from './settingsStore'
 import { useTimeEntryStore } from './timeEntryStore'
@@ -166,26 +167,33 @@ export const useWorkDayStore = create<WorkDayStore>()(
           return 0
         }
 
-        // Zeit-Berechnung:
-        // 1. Alle timeEntries addieren (laufende und beendete)
-        // 2. Pause abziehen
+        // Zeit-Berechnung MUST sein:
+        // 1. Alle beendeten timeEntries addieren (feste Zeiten)
+        // 2. Aktuelle laufende Session HINZUFÜGEN ( falls existiert )
+        // 3. Pause abziehen
         
         const { timeEntries } = useTimeEntryStore.getState()
+        const { session } = useTrackingStore.getState()
         
         const today = currentWorkDay.date
         const todayEntries = timeEntries.filter(entry => entry.date === today)
         
-        // Zähle ALLE timeEntries des heutigen Tages
+        // 🔍 WICHTIG: timeEntries sind BEENDET (endTime ist immer gesetzt)
+        // session ist die AKTUELLE, LAUFENDE Session (NICHT in timeEntries gespeichert)
+        
         let totalTime = todayEntries.reduce((total, entry) => {
+          if (!entry.endTime) return total
           const start = new Date(entry.startTime).getTime()
-          const end = entry.endTime ? new Date(entry.endTime).getTime() : Date.now()
+          const end = new Date(entry.endTime).getTime()
           return total + (end - start)
         }, 0)
 
-        // WICHTIG: Wenn KEINE Session läuft, ist totalTime korrekt
-        // Wenn eine Session läuft, wurde sie IN den timeEntries gespeichert (siehe startTracking)
-        // Deshalb NICHT nochmal addieren!
-        
+        // ✅ FIX: Nur die AKTUELLE laufende Session addieren (NICHT doppelt zählen!)
+        if (session.isRunning && session.startTime && session.categoryId) {
+          const sessionStart = new Date(session.startTime).getTime()
+          totalTime += Date.now() - sessionStart
+        }
+
         // Pausenzeit abziehen (inkl. aktuelle Pause falls pausiert)
         let totalPauseMs = currentWorkDay.totalPauseMinutes * 60000
         const pauseStart = currentWorkDay.pauseStart

@@ -82,13 +82,20 @@ function App() {
     }
   }, [currentWorkDay?.endTime, isFeierabendDialogOpen])
 
-  // Reset feierabendFromButton, wenn Dialog geschlossen wird
+  // Reset feierabendFromButton, wenn Dialog nicht geöffnet wird
   // (damit manuelle Öffnung funktioniert)
   useEffect(() => {
-    if (!isFeierabendDialogOpen) {
-      setFeierabendFromButton(false)
+    if (currentWorkDay?.endTime && !isFeierabendDialogOpen) {
+      const today = getTodayDate()
+      const tagHatUebersicht = isDayOverviewShown(today)
+      
+      // Wenn das Flag gesetzt ist (Dialog wird nicht automatisch geöffnet)
+      // und feierabendFromButton noch true ist, resetten
+      if (tagHatUebersicht && feierabendFromButton) {
+        setFeierabendFromButton(false)
+      }
     }
-  }, [isFeierabendDialogOpen])
+  }, [isFeierabendDialogOpen, currentWorkDay?.date, feierabendFromButton])
 
   const isWeekPage = location.pathname === '/week'
   const isDayPage = location.pathname === '/day'
@@ -210,8 +217,7 @@ function App() {
     const today = getTodayDate()
     markDayOverviewShown(today)
     setDayHasOverview(true)
-    // Öffne FeierabendDialog manuell
-    setFeierabendFromButton(true)
+    // Öffne FeierabendDialog manuell (ohne Spruch, da Flag gesetzt wurde)
     setIsFeierabendDialogOpen(true)
   }
 

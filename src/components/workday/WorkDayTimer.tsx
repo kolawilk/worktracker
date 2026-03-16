@@ -42,36 +42,12 @@ const formatPauseDuration = (ms: number): string => {
 }
 
 const WorkDayTimer = () => {
-  const { currentWorkDay } = useWorkDayStore()
+  const { currentWorkDay, getTotalWorkTime, getPauseTime } = useWorkDayStore()
   const [displayTime, setDisplayTime] = useState(0)
   const [displayPause, setDisplayPause] = useState(0)
 
   useEffect(() => {
     // Update immediately on mount or when store changes
-    const getTotalWorkTime = () => {
-      if (!currentWorkDay) return 0
-      const start = new Date(currentWorkDay.startTime).getTime()
-      const end = currentWorkDay.endTime ? new Date(currentWorkDay.endTime).getTime() : Date.now()
-      const grossTime = end - start
-      const pauseTimeMs = currentWorkDay.totalPauseMinutes * 60000
-      let totalPauseMs = pauseTimeMs
-      const pauseStart = currentWorkDay.pauseStart
-      if (currentWorkDay.isPaused && pauseStart !== null) {
-        totalPauseMs += Date.now() - new Date(pauseStart).getTime()
-      }
-      return Math.max(0, grossTime - totalPauseMs)
-    }
-
-    const getPauseTime = () => {
-      if (!currentWorkDay) return 0
-      let totalPause = currentWorkDay.totalPauseMinutes * 60000
-      if (currentWorkDay.isPaused && currentWorkDay.pauseStart !== null) {
-        const pauseStart = new Date(currentWorkDay.pauseStart!).getTime()
-        totalPause += Date.now() - pauseStart
-      }
-      return Math.max(0, totalPause)
-    }
-
     setDisplayTime(getTotalWorkTime())
     setDisplayPause(getPauseTime())
 
@@ -82,7 +58,7 @@ const WorkDayTimer = () => {
     }, 1000)
 
     return () => clearInterval(updateInterval)
-  }, [currentWorkDay]) // 🔥 FIX: Nur currentWorkDay als Dependency, keine Funktionen
+  }, [currentWorkDay, getTotalWorkTime, getPauseTime])
 
   // Check if currently paused
   const isPaused = currentWorkDay?.isPaused ?? false
