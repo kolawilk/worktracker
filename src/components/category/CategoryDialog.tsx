@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmojiPickerDialog } from '@/components/ui/emoji-picker-dialog'
 
 import type { Category } from '@/types'
 
@@ -26,6 +27,7 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
     const [name, setName] = React.useState('')
     const [emoji, setEmoji] = React.useState('')
     const [color, setColor] = React.useState('')
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false)
 
     React.useEffect(() => {
       if (isOpen) {
@@ -38,8 +40,15 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
           setEmoji('')
           setColor('')
         }
+        // Reset emoji picker when dialog opens
+        setIsEmojiPickerOpen(false)
       }
     }, [isOpen, initialCategory])
+
+    const handleEmojiSelect = (selectedEmoji: string) => {
+      setEmoji(selectedEmoji)
+      setIsEmojiPickerOpen(false)
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
@@ -86,7 +95,7 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
 
             <div className="space-y-2">
               <Label htmlFor="category-emoji">Emoji</Label>
-              <div className="flex flex-col gap-2">
+              <div className="space-y-2">
                 <div className="flex gap-2">
                   <Input
                     id="category-emoji"
@@ -95,13 +104,24 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
                     placeholder=" z.B. 💼, 🏠, 📊"
                     maxLength={2}
                     required
+                    className="font-text"
                   />
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-md border bg-accent text-2xl"
-                    aria-hidden="true"
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-[40px] w-[40px] flex-shrink-0"
+                    onClick={() => setIsEmojiPickerOpen(true)}
+                    title="Emoji wählen"
                   >
-                    {emoji || '❓'}
-                  </div>
+                    ❓
+                  </Button>
+                </div>
+                <div
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md border bg-accent text-2xl"
+                  aria-hidden="true"
+                >
+                  {emoji || '❓'}
                 </div>
               </div>
             </div>
@@ -128,16 +148,23 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
               </div>
             </div>
 
-            <DialogFooter className="flex-row justify-between sm:justify-between">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto h-12 text-lg">
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={!name.trim() || !emoji.trim()}>
+              <Button type="submit" disabled={!name.trim() || !emoji.trim()} className="w-full sm:w-auto h-12 text-lg">
                 {mode === 'create' ? 'Speichern' : 'Änderungen speichern'}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
+        
+        {/* Emoji Picker Dialog */}
+        <EmojiPickerDialog
+          isOpen={isEmojiPickerOpen}
+          onClose={() => setIsEmojiPickerOpen(false)}
+          onEmojiSelect={handleEmojiSelect}
+        />
       </Dialog>
     )
   }

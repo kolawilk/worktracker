@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Format duration in milliseconds to readable string
+// Format duration in milliseconds to readable string (e.g. "2h 30m")
 export function formatDuration(ms: number): string {
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -15,6 +15,18 @@ export function formatDuration(ms: number): string {
     return `${hours}h ${minutes % 60}m`;
   }
   return `${minutes}m ${seconds % 60}s`;
+}
+
+// Format duration in seconds to readable string (e.g. "02:30:15")
+export function formatDurationSeconds(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
 // Format time for display (HH:MM)

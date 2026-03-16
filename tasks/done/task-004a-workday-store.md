@@ -1,6 +1,6 @@
 # Task A: WorkDay Store erstellen
 
-**Status:** 📋 Backlog → Active  
+**Status:** ✅ Done  
 **Priority:** P0  
 **Parent Feature:** Feature 004 - Arbeitstag-Steuerung
 

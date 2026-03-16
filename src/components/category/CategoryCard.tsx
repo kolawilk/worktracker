@@ -66,15 +66,23 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
       }
     }
 
+    // Glass-Chic: Border-Farbe mit Transparenz für elegantes Design
+    const borderColorStyle = category.color 
+      ? { borderColor: `${category.color}80`, borderWidth: '3px' } // 50% opacity (80 in hex)
+      : undefined
+
     return (
       <div
         ref={ref}
+        style={borderColorStyle}
         className={cn(
-          'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm',
+          'relative flex flex-col items-center justify-center gap-3 rounded-xl border p-6 shadow-sm transition-all duration-200',
           'min-h-[180px] min-w-[140px]',
-          isPressed && 'scale-95 bg-accent',
-          isActive && 'border-primary shadow-lg bg-primary/5',
-          !isActive && 'hover:shadow-md hover:border-gray-300'
+          'bg-white/5 backdrop-blur-sm', // Glassmorphism base
+          isPressed && 'scale-95 bg-accent/80',
+          isActive && 'shadow-lg bg-primary/10 border-primary/60',
+          !isActive && !category.color && 'hover:shadow-md hover:border-gray-300/50 border-gray-200/30',
+          !isActive && category.color && 'hover:shadow-md hover:brightness-105'
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
@@ -104,14 +112,6 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
           <h3 className="text-lg font-semibold text-foreground">
             {category.name}
           </h3>
-          {/* Farb-Balken immer mit gleicher Größe, damit Grid stabil bleibt */}
-          <div
-            className={cn(
-              "mt-2 h-2 w-8 rounded-full mx-auto",
-              isActive ? 'bg-primary' : 'bg-gray-300'
-            )}
-            aria-hidden="true"
-          />
         </div>
 
         {isActive && (
