@@ -18,6 +18,23 @@ import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher'
 import { FeierabendDialog } from '@/components/workday/FeierabendDialog'
 import './App.css'
 
+// Helper functions for day overview flag
+function getDayOverviewFlagKey(date: string): string {
+  return `dayOverviewShown:${date}`
+}
+
+function hasDayOverviewBeenShown(date: string): boolean {
+  if (!date) return false
+  const flag = localStorage.getItem(getDayOverviewFlagKey(date))
+  return flag === 'true'
+}
+
+function setDayOverviewAsShown(date: string): void {
+  if (date) {
+    localStorage.setItem(getDayOverviewFlagKey(date), 'true')
+  }
+}
+
 function App() {
   const [mounted, setMounted] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -26,6 +43,9 @@ function App() {
   const [isFeierabendDialogOpen, setIsFeierabendDialogOpen] = useState(false)
   const [feierabendFromButton, setFeierabendFromButton] = useState(false)
   const location = useLocation()
+  
+  // Heutiges Datum für Flag-Prüfung
+  const today = new Date().toISOString().split('T')[0]
   
   const { addCategory, updateCategory, deleteCategory, getActiveCategories } = useCategoryStore()
   const { currentWorkDay, startWorkDay, pauseWorkDay, resumeWorkDay, endWorkDay } = useWorkDayStore()
@@ -36,23 +56,42 @@ function App() {
   // Öffne FeierabendDialog automatisch, wenn Arbeitstag beendet wird
   useEffect(() => {
     if (currentWorkDay && currentWorkDay.endTime && !isFeierabendDialogOpen) {
-      // Öffne Dialog nur wenn es nicht vom Button kam
-      if (!feierabendFromButton) {
+      // Prüfe ob Übersicht heute schon angezeigt wurde
+      const alreadyShown = hasDayOverviewBeenShown(currentWorkDay.date)
+      
+      // Öffne Dialog nur wenn:
+      // 1. Es nicht vom Button kam
+      // 2. Und die Übersicht für diesen Tag noch nicht angezeigt wurde
+      if (!feierabendFromButton && !alreadyShown) {
         setIsFeierabendDialogOpen(true)
+        // Flag direkt setzen beim Öffnen
+        setDayOverviewAsShown(currentWorkDay.date)
       }
       // Reset nach Öffnen
       if (isFeierabendDialogOpen) {
         setFeierabendFromButton(false)
       }
     }
-  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton])
+  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton, currentWorkDay?.date])
 
   const isWeekPage = location.pathname === '/week'
   const isDayPage = location.pathname === '/day'
   const isSidebarPage = !isWeekPage && !isDayPage
 
+  // Mount-Effekt: Prüfe ob Tag beendet ist und Übersicht schon gezeigt wurde
   useEffect(() => {
     setMounted(true)
+    
+    // Wenn Tag beendet ist und Übersicht heute schon gezeigt wurde → Flag setzen
+    if (currentWorkDay?.endTime && currentWorkDay.date === today) {
+      if (hasDayOverviewBeenShown(today)) {
+        // Dialog nicht automatisch öffnen, da Flag gesetzt
+        // (Wichtig: isFeierabendDialogOpen bleibt false)
+      } else {
+        // Dialog kann bei Neuladen geöffnet werden (kein Flag gefunden)
+        // Dies wird durch den anderen useEffect behandelt
+      }
+    }
   }, [])
 
   if (!mounted) {
@@ -163,6 +202,8 @@ function App() {
     endWorkDay()
     // Setze Flag, dass der Dialog vom Button kam (kein Spruch anzeigen)
     setFeierabendFromButton(true)
+    // Setze Flag, dass Übersicht angezeigt wurde
+    setDayOverviewAsShown(today)
     // Öffne FeierabendDialog manuell (ohne Spruch)
     setIsFeierabendDialogOpen(true)
   }

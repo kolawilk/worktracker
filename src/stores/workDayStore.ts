@@ -117,6 +117,11 @@ export const useWorkDayStore = create<WorkDayStore>()(
         // Sync: Beende auch das Kategory-Tracking
         useSyncStore.getState().onWorkDayEnd()
 
+        // Setze Flag dass Übersicht angezeigt wurde
+        if (currentWorkDay.date) {
+          localStorage.setItem(`dayOverviewShown:${currentWorkDay.date}`, 'true')
+        }
+
         set({
           currentWorkDay: {
             ...currentWorkDay,

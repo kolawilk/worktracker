@@ -50,6 +50,14 @@ export function FeierabendDialog({ isOpen, onClose, showQuote = true }: Feierabe
     }
   }, [isOpen, showQuote])
 
+  // Setze Flag beim Schließen des Dialogs
+  useEffect(() => {
+    if (!isOpen && currentWorkDay?.date) {
+      // Dialog wurde geschlossen → Flag setzen
+      localStorage.setItem(`dayOverviewShown:${currentWorkDay.date}`, 'true')
+    }
+  }, [isOpen, currentWorkDay?.date])
+
   // Zeitverteilung pro Kategorie berechnen
   const getCategoryData = (): CategoryData[] => {
     const categoryMap = new Map<string, { name: string; value: number; color: string; emoji: string }>()
