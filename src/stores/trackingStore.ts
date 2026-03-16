@@ -100,7 +100,8 @@ export const useTrackingStore = create<TrackingStore>()(
         if (!session.isRunning || !session.startTime) {
           return 0
         }
-        return Math.floor((Date.now() - new Date(session.startTime).getTime()) / 1000)
+        // ✅ FIX: Millisekunden zurückgeben (konsistent mit anderen Stores)
+        return Date.now() - new Date(session.startTime).getTime()
       },
     }),
     {

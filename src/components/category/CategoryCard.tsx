@@ -45,6 +45,7 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     }, [isActive, getCurrentDuration])
     
     const formatDuration = (ms: number): string => {
+      // ✅ FIX: ms sind jetzt tatsächlich Millisekunden (konsistent mit trackingStore)
       const totalSeconds = Math.floor(ms / 1000)
       const hours = Math.floor(totalSeconds / 3600)
       const minutes = Math.floor((totalSeconds % 3600) / 60)

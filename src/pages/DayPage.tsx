@@ -16,7 +16,7 @@ function DayPage() {
   // Heutiges Datum (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0]
 
-  // Berechne Gesamtzeit für heute
+  // Berechne Gesamtzeit für heute (in Sekunden für formatDurationHHMM)
   const totalSeconds = timeEntries
     .filter(entry => entry.date === today)
     .reduce((sum, entry) => {
@@ -125,7 +125,7 @@ function DayPage() {
                   const start = new Date(entry.startTime)
                   const now = new Date()
                   const seconds = Math.floor((now.getTime() - start.getTime()) / 1000)
-                  const durationDisplay = formatDurationHHMM(seconds)
+                  const durationDisplay = formatDurationHHMM(seconds)  // ✅ Konsistent: Sekunden an formatDurationHHMM übergeben
                   
                   return (
                     <div 
