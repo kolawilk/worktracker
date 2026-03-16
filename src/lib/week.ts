@@ -29,13 +29,21 @@ export function getWeekEnd(date: Date): Date {
 
 /**
  * Formatiert ein Datum als ISO-Woche (z.B. "2026-W12")
+ * ISO 8601: Week 1 is the week containing Jan 4
  */
 export function formatISOWeek(date: Date): string {
-  const d = new Date(date)
-  d.setDate(d.getDate() + 4) // auf Donnerstag setzen für ISO-Week-Number
-  const year = d.getFullYear()
+  // Use UTC to avoid DST issues
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  // Adjust to Thursday (day 4 in ISO week where Monday=1, Sunday=7)
+  const day = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() - day + 4)
+  
+  const year = d.getUTCFullYear()
+  // Calculate day of year for the Thursday
   const dayOfYear = Math.floor((d.getTime() - new Date(year, 0, 1).getTime()) / 86400000)
-  const weekNumber = Math.floor((dayOfYear + d.getDay() + 1) / 7)
+  // Week number = ceil((dayOfYear + 1) / 7)
+  const weekNumber = Math.ceil((dayOfYear + 1) / 7)
+  
   return `W${weekNumber.toString().padStart(2, '0')}`
 }
 

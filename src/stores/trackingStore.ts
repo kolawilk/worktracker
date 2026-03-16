@@ -29,7 +29,7 @@ export const useTrackingStore = create<TrackingStore>()(
 
       startTracking: (categoryId) => {
         const { session } = get()
-        // Wenn bereits eine Session läuft, diese erst stoppen
+        // Wenn bereits eine Session läuft, diese erst beenden (ohne Zeitverlust!)
         if (session.isRunning && session.startTime && session.categoryId) {
           // ZeitEintrag für die aktuelle Kategorie speichern
           const endTime = new Date()
@@ -44,6 +44,7 @@ export const useTrackingStore = create<TrackingStore>()(
           })
         }
 
+        // NEUE Session starten (ohne Pause dazwischen!)
         set({
           session: {
             categoryId,
@@ -59,6 +60,8 @@ export const useTrackingStore = create<TrackingStore>()(
           return
         }
 
+        // Stoppen der aktuellen Session (in startTracking wird die alte schon gespeichert)
+        // Hier wird die aktuelle Session beendet und gespeichert
         const endTime = new Date().toISOString()
         
         // ZeitEintrag speichern
