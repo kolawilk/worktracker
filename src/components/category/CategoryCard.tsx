@@ -21,28 +21,26 @@ const CategoryCard = React.forwardRef<HTMLDivElement, CategoryCardProps>(
     const [displayDuration, setDisplayDuration] = React.useState(0)
     const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     
-    const { session, getCurrentDuration } = useTrackingStore()
+    const { session } = useTrackingStore()
     const { onCategoryClick } = useSyncStore()
     
     const isActive = session.categoryId === category.id && session.isRunning
     
-    // 🔥 FIX: Aktualisiere Kategorie-Zeit alle 100ms automatisch, nicht nur bei Hover
+    // Aktualisiere Kategorie-Zeit alle 100ms automatisch, nicht nur bei Hover
     useEffect(() => {
-      if (!isActive) return
+      if (!isActive) {
+        setDisplayDuration(0)
+        return
+      }
       
       const updateInterval = setInterval(() => {
-        setDisplayDuration(getCurrentDuration())
-      }, 100)  // 100ms für flüssige Anzeige (10 FPS für Timer)
+        // Berechne aktuelle Dauer direkt (kein Storing nötig)
+        const startTime = new Date(session.startTime ?? 0)
+        setDisplayDuration(Date.now() - startTime.getTime())
+      }, 100)
       
       return () => clearInterval(updateInterval)
-    }, [isActive, getCurrentDuration])
-    
-    // Initialwert setzen
-    useEffect(() => {
-      if (isActive) {
-        setDisplayDuration(getCurrentDuration())
-      }
-    }, [isActive, getCurrentDuration])
+    }, [isActive, session.startTime])
     
     const formatDuration = (ms: number): string => {
       // ✅ FIX: ms sind jetzt tatsächlich Millisekunden (konsistent mit trackingStore)
