@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { useTrackingStore } from './trackingStore'
 import { useTimeEntryStore } from './timeEntryStore'
+import { useWorkDayStore } from './workDayStore'
 
 // Temporary storage for last active category during pause
 let lastActiveCategoryId: string | null = null
@@ -64,6 +65,22 @@ export const useSyncStore = create<SyncStore>()(() => ({
 
   onCategoryClick: (categoryId: string) => {
     const { session, startTracking, pauseTracking } = useTrackingStore.getState()
+    
+    // 🔥 FIX: Arbeitstag automatisch starten/resumen, wenn nicht gestartet
+    const { currentWorkDay, startWorkDay, resumeWorkDay, resumeEndedWorkDay } = useWorkDayStore.getState()
+    
+    // Wenn kein Arbeitstag existiert → starten
+    if (!currentWorkDay) {
+      startWorkDay()
+    } 
+    // Wenn Arbeitstag pausiert ist → fortsetzen
+    else if (currentWorkDay.isPaused) {
+      resumeWorkDay()
+    }
+    // Wenn Arbeitstag beendet ist → fortsetzen (neuer Arbeitstag an demselben Tag)
+    else if (currentWorkDay.endTime !== null) {
+      resumeEndedWorkDay()
+    }
     
     // Wenn dieselbe Kategorie angeklickt wird und sie aktiv ist → stoppen
     if (session.categoryId === categoryId && session.isRunning) {
