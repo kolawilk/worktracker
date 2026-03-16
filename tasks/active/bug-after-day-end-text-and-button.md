@@ -1,6 +1,6 @@
 # Bug: Nach Tag-Beendigung - Text falsch + Start-Button nicht klickbar
 
-**Status:** 📋 Backlog  
+**Status:** ✅ Done  
 **Priority:** P1  
 **Type:** Bug
 
@@ -27,9 +27,9 @@ Der Start-Button nach Beendigung des Tages ist nicht klickbar.
 - `src/stores/workDayStore.ts`
 
 ## Akzeptanzkriterien
-- [ ] Text ist korrekt (unterscheidet neu/fortsetzen)
-- [ ] Start-Button ist klickbar nach Beendigung
-- [ ] Logik für Tag-Wechsel ist korrekt implementiert
+- [x] Text ist korrekt (unterscheidet neu/fortsetzen)
+- [x] Start-Button ist klickbar nach Beendigung
+- [x] Logik für Tag-Wechsel ist korrekt implementiert
 
 ---
 
