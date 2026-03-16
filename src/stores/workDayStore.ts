@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { WorkDay } from '@/types'
 import { useSyncStore } from './syncStore'
+import { playStartSound, playPauseSound, playResumeSound, playEndSound } from '@/lib/sounds'
+import { useSettingsStore } from './settingsStore'
 
 interface WorkDayStore {
   currentWorkDay: WorkDay | null
@@ -46,6 +48,11 @@ export const useWorkDayStore = create<WorkDayStore>()(
           },
           history,
         })
+        
+        // Sound Feedback
+        if (useSettingsStore.getState().soundEnabled) {
+          playStartSound()
+        }
       },
 
       pauseWorkDay: () => {
@@ -64,6 +71,11 @@ export const useWorkDayStore = create<WorkDayStore>()(
             pauseStart: new Date().toISOString(),
           },
         })
+        
+        // Sound Feedback
+        if (useSettingsStore.getState().soundEnabled) {
+          playPauseSound()
+        }
       },
 
       resumeWorkDay: () => {
@@ -87,6 +99,11 @@ export const useWorkDayStore = create<WorkDayStore>()(
             totalPauseMinutes: currentWorkDay.totalPauseMinutes + pauseDurationMinutes,
           },
         })
+        
+        // Sound Feedback
+        if (useSettingsStore.getState().soundEnabled) {
+          playResumeSound()
+        }
       },
 
       endWorkDay: () => {
@@ -104,6 +121,11 @@ export const useWorkDayStore = create<WorkDayStore>()(
             endTime: new Date().toISOString(),
           },
         })
+        
+        // Sound Feedback
+        if (useSettingsStore.getState().soundEnabled) {
+          playEndSound()
+        }
       },
 
       getCurrentWorkDay: () => {

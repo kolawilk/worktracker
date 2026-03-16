@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EmojiPickerDialog } from '@/components/ui/emoji-picker-dialog'
 
 import type { Category } from '@/types'
 
@@ -26,6 +27,7 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
     const [name, setName] = React.useState('')
     const [emoji, setEmoji] = React.useState('')
     const [color, setColor] = React.useState('')
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false)
 
     React.useEffect(() => {
       if (isOpen) {
@@ -38,8 +40,15 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
           setEmoji('')
           setColor('')
         }
+        // Reset emoji picker when dialog opens
+        setIsEmojiPickerOpen(false)
       }
     }, [isOpen, initialCategory])
+
+    const handleEmojiSelect = (selectedEmoji: string) => {
+      setEmoji(selectedEmoji)
+      setIsEmojiPickerOpen(false)
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
@@ -87,15 +96,27 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
             <div className="space-y-2">
               <Label htmlFor="category-emoji">Emoji</Label>
               <div className="space-y-2">
-                <Input
-                  id="category-emoji"
-                  value={emoji}
-                  onChange={handleEmojiInput}
-                  placeholder=" z.B. 💼, 🏠, 📊"
-                  maxLength={2}
-                  required
-                  className="font-text"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="category-emoji"
+                    value={emoji}
+                    onChange={handleEmojiInput}
+                    placeholder=" z.B. 💼, 🏠, 📊"
+                    maxLength={2}
+                    required
+                    className="font-text"
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-[40px] w-[40px] flex-shrink-0"
+                    onClick={() => setIsEmojiPickerOpen(true)}
+                    title="Emoji wählen"
+                  >
+                    ❓
+                  </Button>
+                </div>
                 <div
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md border bg-accent text-2xl"
                   aria-hidden="true"
@@ -137,6 +158,13 @@ const CategoryDialog = React.forwardRef<HTMLDivElement, CategoryDialogProps>(
             </DialogFooter>
           </form>
         </DialogContent>
+        
+        {/* Emoji Picker Dialog */}
+        <EmojiPickerDialog
+          isOpen={isEmojiPickerOpen}
+          onClose={() => setIsEmojiPickerOpen(false)}
+          onEmojiSelect={handleEmojiSelect}
+        />
       </Dialog>
     )
   }

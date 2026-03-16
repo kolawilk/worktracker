@@ -1,6 +1,6 @@
 # Bugfix: Arbeitstag nach Beenden neu starten
 
-**Status:** 📋 Backlog  
+**Status:** ✅ DONE  
 **Priority:** P1  
 **Parent:** Feature 004
 
@@ -14,10 +14,11 @@ Wenn der Arbeitstag beendet wurde (endTime gesetzt), kann er nicht neu gestartet
 - Neuen Tag starten überschreibt/erstellt neu
 
 ## Akzeptanzkriterien
-- [ ] Nach Beenden kann ein neuer Arbeitstag gestartet werden
-- [ ] Zeitberechnung bleibt korrekt
-- [ ] Keine TypeScript Fehler
+- [x] Nach Beenden kann ein neuer Arbeitstag gestartet werden
+- [x] Zeitberechnung bleibt korrekt
+- [x] Keine TypeScript Fehler
 
----
-
-**Created:** 2026-03-15
+## Ergebnis
+- `startWorkDay()` prüft jetzt auf `endTime !== null`
+- Wenn beendet: Alter Tag wird zur History hinzugefügt, neuer Tag wird erstellt
+- Build erfolgreich, keine TypeScript Fehler

@@ -7,9 +7,14 @@ import { useTrackingStore } from '@/stores/trackingStore'
 import { useWorkDayStore } from '@/stores/workDayStore'
 import { Link, Routes, Route, useLocation } from 'react-router-dom'
 import WeekPage from '@/pages/WeekPage'
+import DayPage from '@/pages/DayPage'
+import AnalyticsPage from '@/pages/AnalyticsPage'
+import SettingsPage from '@/pages/SettingsPage'
 import type { Category } from '@/types'
-import { Play, Pause, Square } from 'lucide-react'
+import { Play, Pause, Square, List, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher'
+import { FeierabendDialog } from '@/components/workday/FeierabendDialog'
 import './App.css'
 
 function App() {
@@ -17,6 +22,8 @@ function App() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined)
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
+  const [isFeierabendDialogOpen, setIsFeierabendDialogOpen] = useState(false)
+  const [feierabendFromButton, setFeierabendFromButton] = useState(false)
   const location = useLocation()
   
   const { addCategory, updateCategory, deleteCategory, getActiveCategories } = useCategoryStore()
@@ -24,6 +31,24 @@ function App() {
   useTrackingStore()
 
   const activeCategories = getActiveCategories()
+
+  // Öffne FeierabendDialog automatisch, wenn Arbeitstag beendet wird
+  useEffect(() => {
+    if (currentWorkDay && currentWorkDay.endTime && !isFeierabendDialogOpen) {
+      // Öffne Dialog nur wenn es nicht vom Button kam
+      if (!feierabendFromButton) {
+        setIsFeierabendDialogOpen(true)
+      }
+      // Reset nach Öffnen
+      if (isFeierabendDialogOpen) {
+        setFeierabendFromButton(false)
+      }
+    }
+  }, [currentWorkDay?.endTime, isFeierabendDialogOpen, feierabendFromButton])
+
+  const isWeekPage = location.pathname === '/week'
+  const isDayPage = location.pathname === '/day'
+  const isSidebarPage = !isWeekPage && !isDayPage
 
   useEffect(() => {
     setMounted(true)
@@ -62,8 +87,6 @@ function App() {
   const handleSelectCategory = (_category: Category) => {
     // Tracking wird in CategoryCard direkt über die Store-Funktionen gestartet/gestoppt
   }
-
-  const isWeekPage = location.pathname === '/week'
 
   // WorkDay Status & Helper Functions (inline für Header)
   const getStatus = () => {
@@ -135,7 +158,12 @@ function App() {
   }
 
   const handleEndWorkDay = () => {
+    // Beende Arbeitstag
     endWorkDay()
+    // Setze Flag, dass der Dialog vom Button kam (kein Spruch anzeigen)
+    setFeierabendFromButton(true)
+    // Öffne FeierabendDialog manuell (ohne Spruch)
+    setIsFeierabendDialogOpen(true)
   }
 
   return (
@@ -152,6 +180,15 @@ function App() {
               🏠
             </Button>
           </Link>
+          <Link to="/day" title="Tages-Übersicht">
+            <Button 
+              variant={location.pathname === '/day' ? 'default' : 'ghost'} 
+              className="rounded-xl"
+              size="icon"
+            >
+              <List className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/week" title="Wochen-Auswertung">
             <Button 
               variant={location.pathname === '/week' ? 'default' : 'ghost'} 
@@ -159,6 +196,15 @@ function App() {
               size="icon"
             >
               📊
+            </Button>
+          </Link>
+          <Link to="/analytics" title="Analytics Dashboard">
+            <Button 
+              variant={location.pathname === '/analytics' ? 'default' : 'ghost'} 
+              className="rounded-xl"
+              size="icon"
+            >
+              <TrendingUp className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/settings" title="Einstellungen">
@@ -174,10 +220,10 @@ function App() {
       </nav>
 
       {/* Hauptinhalt mit Platz für Sidebar */}
-      <div className={isWeekPage ? "p-6" : "pl-[64px] p-6"}>
+      <div className={isWeekPage || isDayPage ? "p-6" : "pl-[64px] p-6"}>
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header - kompakt, keine separaten Header-Bereich */}
-          {!isWeekPage && (
+          {isSidebarPage && (
             <div className="flex items-center justify-between py-3 px-4 border-b">
               {/* Links: Titel */}
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -232,39 +278,57 @@ function App() {
                   </div>
                 </div>
 
-                {/* Stopp Button */}
+                {/* Feierabend Button */}
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   size="icon"
                   className={cn(
                     'h-[48px] w-[48px] rounded-lg transition-all duration-200 flex-shrink-0',
-                    'hover:bg-red-700 shadow-md',
+                    'hover:bg-green-100 hover:text-green-700 dark:hover:bg-green-900 dark:hover:text-green-300',
                     (status.status === 'not-started' || status.status === 'ended') && 'opacity-50 cursor-not-allowed'
                   )}
                   onClick={handleEndWorkDay}
                   disabled={status.status === 'not-started' || status.status === 'ended'}
-                  aria-label="Arbeitstag beenden"
+                  title="Feierabend"
                 >
-                  <Square className="h-6 w-6" />
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-xs font-bold">Feierabend</span>
+                    <Square className="h-4 w-4" />
+                  </div>
                 </Button>
               </div>
 
-              {/* Rechts: Neue Kategorie Button */}
-              <Button 
-                onClick={handleAddCategory} 
-                size="sm"
-                className="h-[48px] rounded-lg"
-              >
-                + Neue Kategorie
-              </Button>
+              {/* Rechts: Neue Kategorie Button, Feierabend Button und Theme Switcher */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={handleAddCategory} 
+                  size="sm"
+                  className="h-[48px] rounded-lg"
+                >
+                  + Neue Kategorie
+                </Button>
+                <ThemeSwitcher />
+              </div>
             </div>
           )}
 
           {/* Main Content Routes */}
           <Routes>
             <Route 
+              path="/day" 
+              element={<DayPage />} 
+            />
+            <Route 
               path="/week" 
               element={<WeekPage />} 
+            />
+            <Route 
+              path="/analytics" 
+              element={<AnalyticsPage />} 
+            />
+            <Route 
+              path="/settings" 
+              element={<SettingsPage />} 
             />
             <Route 
               path="/" 
@@ -308,6 +372,13 @@ function App() {
             onSubmit={handleDialogSubmit}
             initialCategory={editingCategory}
             mode={dialogMode}
+          />
+          
+          {/* FeierabendDialog */}
+          <FeierabendDialog
+            isOpen={isFeierabendDialogOpen}
+            onClose={() => setIsFeierabendDialogOpen(false)}
+            showQuote={!feierabendFromButton}
           />
         </div>
       </div>
