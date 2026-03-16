@@ -305,7 +305,7 @@ function App() {
                           : 'bg-muted text-muted-foreground cursor-not-allowed'
                   )}
                   onClick={handleStartPause}
-                  disabled={status.status === 'running' || status.status === 'paused'}
+                  disabled={!currentWorkDay}
                   aria-label={status.status === 'running' ? 'Pause' : status.status === 'ended' ? 'Fortfahren' : 'Start'}
                 >
                   {status.status === 'running' ? (
